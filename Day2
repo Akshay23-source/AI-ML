@@ -1,0 +1,1206 @@
+# 🚀 AI/ML ENGINEER — DAY 3/120
+
+## Phase 1: Foundations
+
+### Topic: **Pandas — DataFrames, Data Cleaning & Exploratory Data Analysis (EDA)**
+
+Yesterday we learned **NumPy**, which gives us the numerical foundation.
+
+Today we move one level higher:
+
+> **Raw data → Pandas → Clean data → Understand data → Prepare features → ML model**
+
+This is one of the most important practical skills for an AI/ML engineer because **real-world ML is rarely about receiving a perfectly clean dataset.**
+
+---
+
+# 1. Executive Summary & Core Intuition
+
+## What is Pandas?
+
+**Pandas is a Python library for manipulating, analyzing, cleaning, and transforming structured/tabular data.**
+
+Its two fundamental structures are:
+
+* **Series** → one-dimensional labeled data
+* **DataFrame** → two-dimensional labeled table
+
+### Interview definition
+
+> **"Pandas is a Python data-analysis library built around labeled data structures such as Series and DataFrames. It provides efficient operations for data loading, cleaning, transformation, aggregation, exploration, and feature preparation."**
+
+---
+
+## 🧒 ELI5 Mental Model
+
+Imagine you receive this Excel sheet:
+
+| Name  | Age | Salary | City      |
+| ----- | --: | -----: | --------- |
+| Ravi  |  23 |  40000 | Mangalore |
+| Anu   |  25 |  50000 | Bangalore |
+| Raj   |   ? |  45000 | Mangalore |
+| Priya |  28 |      ? | Bangalore |
+
+Before training a model, you need to:
+
+```text
+Find missing values
+        ↓
+Fix incorrect values
+        ↓
+Remove duplicates
+        ↓
+Understand distributions
+        ↓
+Convert categories
+        ↓
+Create useful features
+        ↓
+Train ML model
+```
+
+**Pandas is your workbench for doing much of this.**
+
+---
+
+# 2. Why Pandas Matters in AI/ML
+
+A typical ML pipeline looks like:
+
+```text
+Raw Dataset
+     ↓
+Pandas
+     ↓
+Data Cleaning
+     ↓
+EDA
+     ↓
+Feature Engineering
+     ↓
+NumPy / Scikit-learn
+     ↓
+ML Model
+```
+
+If you don't understand the data, you can build a mathematically sophisticated model that solves the **wrong problem**.
+
+---
+
+# 3. Core Data Structures
+
+## 3.1 Series
+
+A Series is essentially a labeled one-dimensional collection.
+
+```python
+import pandas as pd
+
+ages = pd.Series([21, 24, 28, 30])
+
+print(ages)
+```
+
+Conceptually:
+
+```text
+0    21
+1    24
+2    28
+3    30
+```
+
+The left side is the **index**.
+
+---
+
+# 4. DataFrame
+
+A DataFrame is a table.
+
+```python
+data = {
+    "name": ["Akshay", "Rahul", "Priya"],
+    "age": [21, 23, 22],
+    "score": [85, 90, 78]
+}
+
+df = pd.DataFrame(data)
+
+print(df)
+```
+
+Output:
+
+```text
+     name  age  score
+0  Akshay   21     85
+1   Rahul   23     90
+2   Priya   22     78
+```
+
+Think:
+
+```text
+DataFrame
+│
+├── rows
+├── columns
+├── index
+└── values
+```
+
+---
+
+# 5. Inspecting Your Dataset 🔥
+
+This should become muscle memory.
+
+## `head()`
+
+```python
+df.head()
+```
+
+Shows first 5 rows.
+
+---
+
+## `tail()`
+
+```python
+df.tail()
+```
+
+Shows last 5 rows.
+
+---
+
+## `shape`
+
+```python
+df.shape
+```
+
+Example:
+
+```text
+(1000, 8)
+```
+
+means:
+
+```text
+1000 rows
+8 columns
+```
+
+---
+
+## `columns`
+
+```python
+df.columns
+```
+
+---
+
+## `dtypes`
+
+```python
+df.dtypes
+```
+
+Shows the datatype of every column.
+
+---
+
+# 6. `info()` — Extremely Important
+
+```python
+df.info()
+```
+
+This gives information about:
+
+* Number of rows
+* Column names
+* Non-null values
+* Data types
+* Memory usage
+
+Example:
+
+```text
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1000 entries
+Data columns:
+age       980 non-null
+salary    950 non-null
+city      1000 non-null
+```
+
+Immediately you can notice:
+
+```text
+age → 20 missing
+salary → 50 missing
+```
+
+That's already useful for ML preprocessing.
+
+---
+
+# 7. Statistical Summary
+
+```python
+df.describe()
+```
+
+For numerical columns, you'll typically see:
+
+```text
+count
+mean
+std
+min
+25%
+50%
+75%
+max
+```
+
+Example:
+
+```text
+salary
+
+mean = 52,000
+std  = 11,000
+min  = 25,000
+max  = 150,000
+```
+
+This can immediately reveal possible outliers.
+
+---
+
+# 8. Selecting Columns
+
+Single column:
+
+```python
+df["salary"]
+```
+
+Multiple columns:
+
+```python
+df[["age", "salary"]]
+```
+
+This distinction is important.
+
+```python
+df["age"]
+```
+
+returns a **Series**.
+
+```python
+df[["age"]]
+```
+
+returns a **DataFrame**.
+
+---
+
+# 9. Filtering Rows
+
+Suppose:
+
+```python
+df[df["age"] > 25]
+```
+
+Meaning:
+
+> Give me rows where age is greater than 25.
+
+Multiple conditions:
+
+```python
+df[
+    (df["age"] > 25) &
+    (df["salary"] > 50000)
+]
+```
+
+Use:
+
+```text
+& → AND
+| → OR
+```
+
+with appropriate parentheses.
+
+---
+
+# 10. Missing Values 🔥🔥
+
+This is one of the most important real-world ML problems.
+
+Suppose:
+
+```text
+Age
+23
+25
+NaN
+28
+NaN
+```
+
+Check missing values:
+
+```python
+df.isnull()
+```
+
+Better:
+
+```python
+df.isnull().sum()
+```
+
+Example:
+
+```text
+age       2
+salary    5
+city      0
+```
+
+Now you know exactly where the problem is.
+
+---
+
+# 11. Handling Missing Values
+
+There isn't one universally correct method.
+
+The correct choice depends on:
+
+* Why values are missing
+* Feature type
+* Amount missing
+* Distribution
+* Business meaning
+
+---
+
+## Option 1 — Remove rows
+
+```python
+df.dropna()
+```
+
+But this can throw away valuable data.
+
+---
+
+## Option 2 — Fill with mean
+
+```python
+df["age"] = df["age"].fillna(df["age"].mean())
+```
+
+Useful in some numerical situations.
+
+But mean can be sensitive to outliers.
+
+---
+
+## Option 3 — Median
+
+```python
+df["age"] = df["age"].fillna(df["age"].median())
+```
+
+Median is often more robust when distributions are skewed.
+
+---
+
+## Option 4 — Categorical mode
+
+```python
+df["city"] = df["city"].fillna(df["city"].mode()[0])
+```
+
+---
+
+# 12. Important Interview Concept: Why Median Instead of Mean?
+
+Suppose salaries are:
+
+```text
+30k
+35k
+40k
+42k
+1,000k
+```
+
+The huge value:
+
+```text
+1,000k
+```
+
+pulls the mean upward.
+
+Median is less affected by extreme values.
+
+So:
+
+> **Mean is sensitive to outliers; median is generally more robust.**
+
+But don't blindly use median either. Understand the data-generating process first.
+
+---
+
+# 13. Duplicates
+
+Check:
+
+```python
+df.duplicated().sum()
+```
+
+Remove duplicates:
+
+```python
+df = df.drop_duplicates()
+```
+
+Why does this matter?
+
+Imagine a customer appears 20 times because of a database bug.
+
+Your ML model might treat those repeated records as 20 independent observations.
+
+That can distort the learned distribution.
+
+---
+
+# 14. Sorting
+
+```python
+df.sort_values("salary")
+```
+
+Descending:
+
+```python
+df.sort_values("salary", ascending=False)
+```
+
+Useful for exploration.
+
+---
+
+# 15. Creating New Features 🔥
+
+This is where data analysis starts becoming **machine learning preparation**.
+
+Suppose:
+
+```python
+df["salary"]
+```
+
+Create salary in lakhs:
+
+```python
+df["salary_lakhs"] = df["salary"] / 100000
+```
+
+You've just performed **feature engineering**.
+
+---
+
+# 16. Real-World Example
+
+Suppose you're building a house-price prediction model.
+
+Raw data:
+
+```text
+area
+bedrooms
+bathrooms
+location
+year_built
+price
+```
+
+You might create:
+
+```text
+price_per_sqft
+property_age
+rooms_per_bedroom
+```
+
+For example:
+
+$$
+property\_age=current\_year-year\_built
+$$
+
+This may provide the model with a more useful representation of the underlying problem.
+
+---
+
+# 17. Categorical Data
+
+ML algorithms generally require numerical representations.
+
+Suppose:
+
+```text
+City
+
+Mangalore
+Bangalore
+Mumbai
+```
+
+You can't simply assume:
+
+```text
+Mangalore = 1
+Bangalore = 2
+Mumbai = 3
+```
+
+because this creates an artificial ordering.
+
+Instead, one common method is **one-hot encoding**.
+
+Conceptually:
+
+```text
+City       Bangalore  Mangalore  Mumbai
+Bangalore      1          0         0
+Mangalore      0          1         0
+Mumbai         0          0         1
+```
+
+Pandas can create this representation:
+
+```python
+pd.get_dummies(df, columns=["city"])
+```
+
+Later we'll study proper production preprocessing using **Scikit-learn Pipelines**, which is safer for ML workflows.
+
+---
+
+# 18. GroupBy 🔥
+
+This is one of Pandas' most powerful operations.
+
+Suppose:
+
+```text
+city       salary
+Mangalore  40000
+Mangalore  50000
+Bangalore  60000
+Bangalore  70000
+```
+
+Calculate average salary per city:
+
+```python
+df.groupby("city")["salary"].mean()
+```
+
+Result conceptually:
+
+```text
+Bangalore     65000
+Mangalore     45000
+```
+
+This is extremely useful for:
+
+* Business analytics
+* Feature engineering
+* Data exploration
+* Aggregations
+
+---
+
+# 19. Aggregations
+
+You can perform:
+
+```python
+df.groupby("city")["salary"].agg(
+    ["mean", "median", "min", "max"]
+)
+```
+
+Now you can understand the distribution by group.
+
+---
+
+# 20. EDA — Exploratory Data Analysis 🔎
+
+EDA means:
+
+> **Systematically exploring your dataset to understand its structure, distributions, relationships, anomalies, and potential data-quality problems before modeling.**
+
+Typical process:
+
+```text
+Load
+ ↓
+Inspect
+ ↓
+Clean
+ ↓
+Summarize
+ ↓
+Visualize
+ ↓
+Find relationships
+ ↓
+Identify anomalies
+ ↓
+Form hypotheses
+ ↓
+Prepare features
+```
+
+---
+
+# 21. Correlation
+
+Suppose:
+
+```python
+df.corr(numeric_only=True)
+```
+
+You may get:
+
+```text
+             age    salary
+age          1.0     0.65
+salary       0.65    1.0
+```
+
+A positive correlation means the variables tend to increase together.
+
+But **correlation does not establish causation**.
+
+This is a common interview trap.
+
+---
+
+# 22. Practical EDA Project 🔬
+
+Today we'll work with a synthetic employee dataset.
+
+```python
+import pandas as pd
+import numpy as np
+
+np.random.seed(42)
+
+df = pd.DataFrame({
+    "age": [22, 25, 28, 30, np.nan, 35, 40, 25],
+    "salary": [30000, 40000, 50000, 60000, 55000, np.nan, 90000, 40000],
+    "experience": [1, 2, 4, 6, 5, 10, 15, 2],
+    "city": [
+        "Mangalore",
+        "Bangalore",
+        "Mangalore",
+        "Mumbai",
+        "Bangalore",
+        "Mumbai",
+        "Bangalore",
+        "Bangalore"
+    ]
+})
+
+print(df)
+```
+
+---
+
+# 23. Your First Data Investigation
+
+Run:
+
+```python
+print(df.shape)
+print(df.info())
+print(df.describe())
+print(df.isnull().sum())
+```
+
+You're performing a real ML data-audit workflow.
+
+---
+
+# 24. Clean the Dataset
+
+Fill numerical missing values:
+
+```python
+df["age"] = df["age"].fillna(df["age"].median())
+
+df["salary"] = df["salary"].fillna(df["salary"].median())
+```
+
+Check again:
+
+```python
+print(df.isnull().sum())
+```
+
+Expected:
+
+```text
+age           0
+salary        0
+experience    0
+city          0
+```
+
+---
+
+# 25. Feature Engineering
+
+Create:
+
+```python
+df["salary_lakhs"] = df["salary"] / 100000
+```
+
+Then:
+
+```python
+print(df)
+```
+
+You now have a derived feature.
+
+---
+
+# 26. Group Analysis
+
+```python
+city_salary = df.groupby("city")["salary"].mean()
+
+print(city_salary)
+```
+
+Question:
+
+> Which city has the highest average salary in this synthetic dataset?
+
+Remember: **this is only our generated example, not a real-world conclusion about cities.**
+
+---
+
+# 27. Convert Categories
+
+```python
+encoded_df = pd.get_dummies(
+    df,
+    columns=["city"]
+)
+
+print(encoded_df)
+```
+
+Now the categorical feature has numerical columns.
+
+---
+
+# 28. Practical Challenge 🔥
+
+Create a new feature:
+
+```text
+experience_per_age
+```
+
+Formula:
+
+$$
+experience\_per\_age=
+\frac{experience}{age}
+$$
+
+Implement:
+
+```python
+df["experience_per_age"] = ...
+```
+
+Then calculate:
+
+```python
+df["experience_per_age"].describe()
+```
+
+### Next challenge
+
+Find the employee with:
+
+**highest salary**
+
+Hint:
+
+```python
+df.loc[df["salary"].idxmax()]
+```
+
+Understand **why** this works rather than just copying it.
+
+---
+
+# 29. Important Data Science Concept — Data Leakage 🚨
+
+This is one of the most important things we'll begin learning early.
+
+Suppose you're predicting:
+
+> Whether a customer will default on a loan.
+
+You accidentally include:
+
+```text
+loan_recovery_status
+```
+
+which is only known **after** the loan default occurs.
+
+Your model may perform amazingly during testing.
+
+But in production:
+
+```text
+Prediction time
+       ↓
+recovery_status doesn't exist yet
+```
+
+Therefore the model cannot actually use it.
+
+This is **data leakage**.
+
+### Core principle
+
+> **A feature must be legitimately available at prediction time.**
+
+We'll revisit this repeatedly throughout your ML training.
+
+---
+
+# 30. Train/Test Leakage
+
+Another important issue.
+
+Suppose you calculate preprocessing statistics using the entire dataset before splitting:
+
+```text
+Train + Test
+     ↓
+Calculate mean
+     ↓
+Transform everything
+     ↓
+Split
+```
+
+The test set has influenced the preprocessing.
+
+Better:
+
+```text
+Dataset
+  ↓
+Split
+ ┌────────┐
+Train    Test
+ ↓
+Fit preprocessing
+ ↓
+Transform Train
+ ↓
+Transform Test using
+Train-fitted parameters
+```
+
+This becomes extremely important when we study:
+
+**Scikit-learn Pipelines.**
+
+---
+
+# 31. Requirements
+
+Today's prerequisites:
+
+### Python
+
+```text
+lists
+dictionaries
+functions
+```
+
+### NumPy
+
+From Day 2:
+
+```text
+arrays
+shapes
+vectorization
+```
+
+### Basic statistics
+
+```text
+mean
+median
+variance
+standard deviation
+```
+
+You now start combining all three.
+
+---
+
+# 32. Trade-Offs
+
+## Pandas Advantages
+
+* Easy tabular manipulation
+* Powerful grouping/aggregation
+* Excellent data-cleaning functionality
+* Integrates well with NumPy and ML libraries
+* Excellent for exploratory analysis
+
+## Limitations
+
+Pandas isn't designed to be the universal solution for:
+
+* Massive distributed datasets
+* GPU-first tensor computation
+* Deep-learning training
+
+For very large data, you may eventually use:
+
+```text
+Spark
+Polars
+Dask
+SQL
+BigQuery
+DuckDB
+```
+
+And for deep learning:
+
+```text
+PyTorch
+TensorFlow
+```
+
+---
+
+# 33. Pandas vs NumPy
+
+| Task              | NumPy | Pandas |
+| ----------------- | ----- | ------ |
+| Numerical arrays  | ⭐⭐⭐⭐⭐ | ⭐⭐⭐    |
+| Matrix operations | ⭐⭐⭐⭐⭐ | ⭐⭐⭐    |
+| Tabular data      | ⭐⭐⭐   | ⭐⭐⭐⭐⭐  |
+| Missing values    | ⭐⭐⭐   | ⭐⭐⭐⭐⭐  |
+| Column labels     | ❌     | ✅      |
+| GroupBy           | ❌     | ✅      |
+| Data cleaning     | ⭐⭐    | ⭐⭐⭐⭐⭐  |
+| ML preprocessing  | ⭐⭐⭐   | ⭐⭐⭐⭐⭐  |
+
+Think:
+
+> **NumPy = numerical computation**
+
+> **Pandas = structured data manipulation**
+
+---
+
+# 34. Interview Preparation 🎯
+
+## Q1. Series vs DataFrame?
+
+**Series:**
+
+```text
+1D labeled data
+```
+
+**DataFrame:**
+
+```text
+2D labeled tabular data
+```
+
+---
+
+## Q2. How would you handle missing data?
+
+Don't answer:
+
+> "I use `fillna()`."
+
+That's incomplete.
+
+A stronger answer:
+
+> "First I would quantify and understand the missingness. Then, depending on the feature type, missing-data mechanism, amount of missingness, distribution, and business meaning, I might remove observations, use an appropriate imputation strategy such as median or mode, or create an explicit missing indicator. For an ML pipeline, the imputation parameters should be learned only from the training data to prevent leakage."
+
+🔥 Much stronger.
+
+---
+
+## Q3. What is data leakage?
+
+> "Data leakage occurs when information that would not legitimately be available at prediction time influences model training or evaluation, causing overly optimistic performance estimates."
+
+---
+
+# 35. 🎤 60-Second Interview Script
+
+> "Pandas is a Python library for structured data manipulation and analysis. Its main structures are Series and DataFrame. In an ML workflow, I use Pandas to load and inspect data, analyze data types and missing values, clean duplicates and invalid records, perform exploratory data analysis, aggregate information using operations such as groupby, and engineer features. However, I make sure preprocessing is performed without leaking information from the test set into training. For production ML, I would typically move repeatable preprocessing into a Scikit-learn Pipeline rather than relying on ad-hoc notebook transformations."
+
+---
+
+# 36. 🧠 Active Recall
+
+Close this answer and answer:
+
+1. What is a DataFrame?
+2. What is a Series?
+3. Difference between `shape`, `info()` and `describe()`?
+4. How do you detect missing values?
+5. Mean vs median?
+6. What is `groupby()`?
+7. What is feature engineering?
+8. Why can integer encoding of categories be dangerous?
+9. What is data leakage?
+10. Why shouldn't you fit preprocessing on the test set?
+
+---
+
+# 37. 🔥 Today's Practical Assignment
+
+Build this complete pipeline yourself:
+
+```text
+Synthetic Employee Dataset
+          ↓
+       Load data
+          ↓
+      Inspect data
+          ↓
+   Find missing values
+          ↓
+      Clean data
+          ↓
+   Create 2 features
+          ↓
+   Encode city
+          ↓
+   Group salary by city
+          ↓
+   Generate statistics
+          ↓
+   Explain findings
+```
+
+### Minimum code you should write yourself
+
+```python
+import pandas as pd
+import numpy as np
+
+# 1. Create dataset
+
+# 2. Inspect
+
+# 3. Find missing values
+
+# 4. Handle missing values
+
+# 5. Feature engineering
+
+# 6. Encoding
+
+# 7. GroupBy
+
+# 8. Statistics
+```
+
+**Don't copy today's code line-by-line. Rebuild it from memory.**
+
+---
+
+# 📈 AI/ML 120-Day Tracker
+
+|   Day | Topic                                | Theory | Practical |
+| ----: | ------------------------------------ | :----: | :-------: |
+|     1 | AI/ML roadmap & learning methodology |    ✅   |     ✅     |
+|     2 | NumPy fundamentals                   |    ✅   |     ✅     |
+| **3** | **Pandas + Data Cleaning + EDA**     |   🔥   |     🔥    |
+
+### Current level
+
+```text
+Python
+   ↓
+NumPy ✅
+   ↓
+Pandas ✅
+   ↓
+EDA 🔥
+   ↓
+Scikit-learn
+   ↓
+Machine Learning
+   ↓
+Deep Learning
+   ↓
+Transformers
+   ↓
+LLMs
+   ↓
+Production AI
+```
+
+## 🔑 Day 3 takeaway
+
+> **A good ML engineer doesn't start by choosing a model. They first understand the data.**
+
+Tomorrow we'll build on this with **Day 4 — Data Visualization + Statistical EDA**, where you'll learn how to visually discover distributions, outliers, relationships, skewness, and patterns that raw tables often hide.
