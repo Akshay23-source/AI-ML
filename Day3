@@ -1,0 +1,1251 @@
+# 🚀 AI/ML ENGINEER — DAY 4/120
+
+## Phase 1: Foundations
+
+### Topic: **Data Visualization + Statistical EDA**
+
+Yesterday we learned how to **load, inspect, clean, transform, and summarize data using Pandas**.
+
+Today we're going one step deeper:
+
+> **Numbers tell you what is happening. Visualizations help you see why it might be happening.**
+
+This is not just "making pretty graphs." In ML, visualization helps you detect:
+
+* distributions
+* outliers
+* skewness
+* relationships
+* class imbalance
+* suspicious patterns
+* data quality problems
+* potential feature relationships
+
+---
+
+# 1. Executive Summary & Core Intuition
+
+## What is Exploratory Data Analysis?
+
+**Exploratory Data Analysis (EDA)** is the systematic process of examining a dataset using statistics and visualizations to understand its structure, distributions, relationships, anomalies, and potential data-quality issues before building a model.
+
+### Interview definition
+
+> **"EDA is the process of systematically analyzing a dataset using descriptive statistics and visualizations to understand distributions, relationships, missingness, outliers, and patterns before modeling."**
+
+---
+
+# 🧒 ELI5 Mental Model
+
+Imagine someone gives you a box containing 10,000 different fruits.
+
+You wouldn't immediately build a machine to classify them.
+
+First you'd ask:
+
+```text
+What fruits are present?
+How many of each?
+Are some damaged?
+What sizes are common?
+Are there unusual fruits?
+Are two characteristics related?
+```
+
+That's essentially what EDA does with data.
+
+---
+
+# 2. The EDA Workflow
+
+A practical ML workflow:
+
+```text
+                RAW DATA
+                    ↓
+              Understand it
+                    ↓
+             Data inspection
+                    ↓
+          ┌─────────┴─────────┐
+          ↓                   ↓
+      Statistics        Visualization
+          ↓                   ↓
+          └─────────┬─────────┘
+                    ↓
+             Find patterns
+                    ↓
+          Detect anomalies
+                    ↓
+        Generate hypotheses
+                    ↓
+          Feature engineering
+                    ↓
+             ML modeling
+```
+
+The important point:
+
+> **EDA happens before serious modeling.**
+
+---
+
+# 3. Today's Tools
+
+We'll use:
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+```
+
+### Main roles
+
+| Tool       | Purpose                   |
+| ---------- | ------------------------- |
+| NumPy      | Numerical computation     |
+| Pandas     | Data manipulation         |
+| Matplotlib | Visualization             |
+| Seaborn    | Statistical visualization |
+
+---
+
+# 4. Dataset for Today's Lab
+
+We'll create a realistic synthetic employee dataset.
+
+```python
+import pandas as pd
+import numpy as np
+
+np.random.seed(42)
+
+df = pd.DataFrame({
+    "age": [22, 24, 25, 27, 29, 30, 32, 35, 40, 45,
+            23, 26, 28, 31, 34, 38, 42, 50, 52, 55],
+
+    "experience": [0, 1, 2, 3, 5, 6, 8, 10, 15, 20,
+                   1, 3, 4, 7, 9, 12, 17, 25, 28, 30],
+
+    "salary": [30000, 35000, 40000, 45000, 52000, 55000,
+               65000, 75000, 100000, 150000,
+               32000, 42000, 48000, 60000, 70000,
+               85000, 110000, 180000, 220000, 250000],
+
+    "department": [
+        "IT", "IT", "HR", "Finance", "IT",
+        "Finance", "IT", "IT", "Finance", "IT",
+        "HR", "IT", "Finance", "IT", "HR",
+        "Finance", "IT", "Finance", "IT", "HR"
+    ]
+})
+```
+
+Start with:
+
+```python
+print(df.head())
+print(df.info())
+print(df.describe())
+```
+
+---
+
+# 5. Univariate Analysis
+
+**Uni = one**
+
+Univariate analysis studies one variable at a time.
+
+For example:
+
+> What does the salary distribution look like?
+
+---
+
+# 6. Histogram 🔥
+
+```python
+plt.hist(df["salary"], bins=10)
+
+plt.xlabel("Salary")
+plt.ylabel("Frequency")
+plt.title("Salary Distribution")
+
+plt.show()
+```
+
+A histogram divides values into ranges called **bins**.
+
+Example:
+
+```text
+Frequency
+  │
+  │       ███
+  │       ███
+  │   ███ ███
+  │   ███ ███      ██
+  │ ██ ███ ███ ██  ██
+  └────────────────────
+       Salary
+```
+
+You're asking:
+
+> Where are most observations concentrated?
+
+---
+
+# 7. Why Histograms Matter in ML
+
+Suppose your target variable looks like:
+
+```text
+      █████████████
+      ███████████
+      █████
+      ██
+      █
+```
+
+This might indicate a **right-skewed distribution**.
+
+For some algorithms and modeling situations, transformations may be useful.
+
+For example:
+
+$$
+x'=\log(1+x)
+$$
+
+But **don't automatically transform every skewed variable**.
+
+You first need to understand:
+
+* why it's skewed
+* what the feature represents
+* which model you're using
+* whether transformation actually improves the problem
+
+---
+
+# 8. Mean, Median and Distribution
+
+Suppose:
+
+```text
+10
+11
+12
+13
+100
+```
+
+Mean:
+
+$$
+\frac{10+11+12+13+100}{5}=29.2
+$$
+
+Median:
+
+```text
+12
+```
+
+The mean is pulled strongly toward the extreme value.
+
+That's why visualizing the distribution is useful.
+
+---
+
+# 9. Box Plot 🔥🔥
+
+A box plot is excellent for detecting potential outliers.
+
+```python
+sns.boxplot(x=df["salary"])
+
+plt.title("Salary Distribution")
+plt.show()
+```
+
+Conceptually:
+
+```text
+      ┌───────────────┐
+──────│      BOX      │──────
+      └───────────────┘
+       ↑      ↑      ↑
+      Q1   Median   Q3
+
+whiskers → typical range
+points   → potential outliers
+```
+
+---
+
+# 10. Quartiles
+
+Suppose sorted data is:
+
+```text
+10 20 30 40 50 60 70 80 90
+```
+
+### Q1
+
+25th percentile.
+
+### Q2
+
+50th percentile = median.
+
+### Q3
+
+75th percentile.
+
+The:
+
+$$
+IQR=Q3-Q1
+$$
+
+is called the **Interquartile Range**.
+
+---
+
+# 11. Outlier Detection Using IQR
+
+A common rule is:
+
+$$
+LowerBound=Q1-1.5(IQR)
+$$
+
+$$
+UpperBound=Q3+1.5(IQR)
+$$
+
+Values outside these boundaries are commonly flagged as potential outliers.
+
+### Important:
+
+> **Potential outlier ≠ bad data**
+
+Suppose you have employee salaries:
+
+```text
+30k
+40k
+50k
+60k
+250k
+```
+
+250k might be a legitimate executive salary.
+
+You should not automatically delete it.
+
+This is an important data-science mindset.
+
+---
+
+# 12. Statistical vs Visual Outlier Detection
+
+### Statistical
+
+```python
+Q1 = df["salary"].quantile(0.25)
+Q3 = df["salary"].quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+```
+
+Then:
+
+```python
+outliers = df[
+    (df["salary"] < lower) |
+    (df["salary"] > upper)
+]
+
+print(outliers)
+```
+
+### Visual
+
+```python
+sns.boxplot(x=df["salary"])
+plt.show()
+```
+
+Best practice:
+
+> Use both statistical reasoning and domain knowledge.
+
+---
+
+# 13. Bar Chart
+
+Bar charts are useful for categorical variables.
+
+```python
+df["department"].value_counts().plot(kind="bar")
+
+plt.xlabel("Department")
+plt.ylabel("Employees")
+plt.title("Employees by Department")
+
+plt.show()
+```
+
+This answers:
+
+> How many observations belong to each category?
+
+---
+
+# 14. Class Imbalance 🔥
+
+Imagine a fraud dataset:
+
+```text
+Normal transactions = 99,000
+Fraud transactions  = 1,000
+```
+
+That's:
+
+```text
+Normal → 99%
+Fraud  → 1%
+```
+
+A model predicting everything as normal gets:
+
+$$
+99\%
+$$
+
+accuracy.
+
+Sounds good.
+
+But it detects:
+
+$$
+0
+$$
+
+fraud cases.
+
+Therefore:
+
+> **EDA can reveal class imbalance before you make the mistake of relying on accuracy.**
+
+---
+
+# 15. Scatter Plot 🔥🔥
+
+Now ask:
+
+> Is experience related to salary?
+
+```python
+plt.scatter(
+    df["experience"],
+    df["salary"]
+)
+
+plt.xlabel("Experience")
+plt.ylabel("Salary")
+plt.title("Experience vs Salary")
+
+plt.show()
+```
+
+You might observe an upward relationship.
+
+That gives us a hypothesis:
+
+> More experience may be associated with higher salary.
+
+But remember:
+
+### Correlation ≠ causation.
+
+---
+
+# 16. Correlation
+
+Calculate:
+
+```python
+df[["age", "experience", "salary"]].corr()
+```
+
+You might see something conceptually like:
+
+```text
+             age  experience  salary
+age          1.0     0.95      0.90
+experience   0.95    1.0       0.92
+salary       0.90    0.92      1.0
+```
+
+The exact values depend on the data.
+
+---
+
+# 17. Heatmap 🔥
+
+A heatmap makes correlation easier to see.
+
+```python
+corr = df[[
+    "age",
+    "experience",
+    "salary"
+]].corr()
+
+sns.heatmap(
+    corr,
+    annot=True,
+    fmt=".2f"
+)
+
+plt.title("Correlation Matrix")
+plt.show()
+```
+
+Conceptually:
+
+```text
+             Age  Exp Salary
+Age         1.00 .95   .90
+Experience  .95  1.00  .92
+Salary      .90  .92   1.00
+```
+
+---
+
+# 18. But Here's the Trap 🚨
+
+Suppose:
+
+$$
+Correlation(age,salary)=0.90
+$$
+
+You **cannot** conclude:
+
+> "Age causes salary to increase."
+
+There may be confounding variables.
+
+For example:
+
+```text
+Age
+ ↓
+Experience
+ ↓
+Salary
+```
+
+The relationship may be partially explained by experience.
+
+This is why data science requires reasoning, not just statistics.
+
+---
+
+# 19. Pairplot
+
+For small datasets, Seaborn's pairplot can provide a quick overview.
+
+```python
+sns.pairplot(
+    df[["age", "experience", "salary"]]
+)
+
+plt.show()
+```
+
+You can see relationships between multiple numerical variables.
+
+For large datasets, however, pairplots can become expensive and visually cluttered.
+
+---
+
+# 20. Bivariate Analysis
+
+**Bi = two**
+
+Examples:
+
+```text
+Age ↔ Salary
+Experience ↔ Salary
+Department ↔ Salary
+```
+
+Useful tools:
+
+* Scatter plot
+* Box plot
+* Bar chart
+* Correlation analysis
+
+---
+
+# 21. Categorical vs Numerical
+
+Suppose we want:
+
+> Salary distribution across departments.
+
+A boxplot is excellent:
+
+```python
+sns.boxplot(
+    x="department",
+    y="salary",
+    data=df
+)
+
+plt.title("Salary by Department")
+plt.show()
+```
+
+Now you can compare:
+
+```text
+IT
+HR
+Finance
+```
+
+rather than just looking at overall salary.
+
+---
+
+# 22. Multivariate Analysis
+
+**Multi = multiple variables**
+
+Suppose:
+
+```text
+Age
+Experience
+Salary
+Department
+```
+
+You're now examining interactions among several variables.
+
+Real ML datasets can have:
+
+```text
+100+
+1000+
+10000+
+```
+
+features.
+
+EDA helps you identify relationships that may matter.
+
+---
+
+# 23. Distribution Shape
+
+You should learn to recognize:
+
+### Normal distribution
+
+```text
+             █
+           ████
+         ███████
+       ███████████
+     ███████████████
+```
+
+Approximately symmetric around the center.
+
+---
+
+### Right-skewed
+
+```text
+████████
+██████
+████
+██
+█
+          →
+```
+
+Long tail toward the right.
+
+Common examples can include:
+
+* income
+* transaction amounts
+* some response-time data
+
+---
+
+### Left-skewed
+
+Opposite pattern.
+
+Understanding distributions matters because many statistical techniques make assumptions about data distributions.
+
+---
+
+# 24. Why Standard Deviation Matters
+
+Suppose:
+
+### Dataset A
+
+```text
+48 49 50 51 52
+```
+
+### Dataset B
+
+```text
+10 30 50 70 90
+```
+
+Both have:
+
+$$
+Mean=50
+$$
+
+But their spread is dramatically different.
+
+Standard deviation captures dispersion.
+
+Roughly:
+
+> **How far observations tend to vary around the mean.**
+
+This becomes critical for:
+
+* Standardization
+* Feature scaling
+* Statistical analysis
+* Anomaly detection
+
+---
+
+# 25. Standardization Connection
+
+Later we'll study:
+
+$$
+z=\frac{x-\mu}{\sigma}
+$$
+
+where:
+
+* \(x\) = observation
+* \(\mu\) = mean
+* \(\sigma\) = standard deviation
+
+This transforms features toward:
+
+```text
+mean ≈ 0
+standard deviation ≈ 1
+```
+
+Why does this matter?
+
+Some ML algorithms are sensitive to feature scale.
+
+We'll go deep into this later.
+
+---
+
+# 26. Real-World ML Scenario
+
+Imagine we're building:
+
+## Customer Churn Prediction
+
+Dataset:
+
+```text
+customer_id
+age
+monthly_bill
+tenure
+support_calls
+contract_type
+churn
+```
+
+Before training:
+
+### Step 1
+
+Check:
+
+```text
+missing values
+```
+
+### Step 2
+
+Plot:
+
+```text
+tenure distribution
+```
+
+### Step 3
+
+Check:
+
+```text
+churn class balance
+```
+
+### Step 4
+
+Analyze:
+
+```text
+monthly_bill vs churn
+```
+
+### Step 5
+
+Analyze:
+
+```text
+support_calls vs churn
+```
+
+### Step 6
+
+Check correlations.
+
+### Step 7
+
+Investigate outliers.
+
+### Step 8
+
+Create useful features.
+
+Only then:
+
+```text
+ML Model
+```
+
+---
+
+# 27. A Professional EDA Checklist
+
+When you receive a new dataset, ask:
+
+### Dataset structure
+
+* How many rows?
+* How many columns?
+* Which are numerical?
+* Which are categorical?
+* Which are dates?
+* Which is the target?
+
+### Data quality
+
+* Missing values?
+* Duplicates?
+* Invalid values?
+* Incorrect types?
+* Impossible values?
+
+### Distribution
+
+* Mean?
+* Median?
+* Variance?
+* Skewness?
+* Outliers?
+
+### Relationships
+
+* Correlation?
+* Feature-target relationship?
+* Category-target relationship?
+* Multicollinearity?
+
+### Target
+
+* Balanced?
+* Imbalanced?
+* Regression or classification?
+* Is the target leaking into features?
+
+This is the mindset I want you to develop.
+
+---
+
+# 28. Practical Lab 🔬
+
+Create:
+
+```text
+day4_eda.py
+```
+
+Start:
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+np.random.seed(42)
+
+df = pd.DataFrame({
+    "age": [
+        22, 24, 25, 27, 29,
+        30, 32, 35, 40, 45,
+        23, 26, 28, 31, 34,
+        38, 42, 50, 52, 55
+    ],
+
+    "experience": [
+        0, 1, 2, 3, 5,
+        6, 8, 10, 15, 20,
+        1, 3, 4, 7, 9,
+        12, 17, 25, 28, 30
+    ],
+
+    "salary": [
+        30000, 35000, 40000, 45000, 52000,
+        55000, 65000, 75000, 100000, 150000,
+        32000, 42000, 48000, 60000, 70000,
+        85000, 110000, 180000, 220000, 250000
+    ],
+
+    "department": [
+        "IT", "IT", "HR", "Finance", "IT",
+        "Finance", "IT", "IT", "Finance", "IT",
+        "HR", "IT", "Finance", "IT", "HR",
+        "Finance", "IT", "Finance", "IT", "HR"
+    ]
+})
+```
+
+Now perform:
+
+### Task 1
+
+```python
+df.info()
+df.describe()
+```
+
+### Task 2
+
+Create a salary histogram.
+
+### Task 3
+
+Create a salary boxplot.
+
+### Task 4
+
+Create an experience vs salary scatter plot.
+
+### Task 5
+
+Create a salary-by-department boxplot.
+
+### Task 6
+
+Create a correlation heatmap.
+
+### Task 7
+
+Find potential salary outliers using IQR.
+
+### Task 8
+
+Answer:
+
+> Does experience appear positively associated with salary in this synthetic dataset?
+
+And importantly:
+
+> Does that prove experience causes higher salary?
+
+---
+
+# 29. 🔥 Advanced Challenge
+
+Create a new dataset:
+
+```python
+np.random.seed(42)
+
+n = 1000
+
+data = pd.DataFrame({
+    "age": np.random.randint(20, 60, n),
+    "experience": np.random.randint(0, 30, n),
+    "salary": np.random.randint(25000, 150000, n)
+})
+```
+
+Now:
+
+### Challenge A
+
+Find:
+
+```text
+mean
+median
+std
+Q1
+Q3
+IQR
+```
+
+for salary.
+
+### Challenge B
+
+Find potential outliers.
+
+### Challenge C
+
+Create three plots:
+
+```text
+salary histogram
+salary boxplot
+experience vs salary scatter plot
+```
+
+### Challenge D
+
+Calculate correlation:
+
+```python
+data.corr()
+```
+
+### Challenge E
+
+Write **3 observations** about the dataset.
+
+This final part is important.
+
+Don't just generate graphs.
+
+**Interpret them.**
+
+---
+
+# 30. Common Beginner Mistakes
+
+### ❌ Mistake 1
+
+Creating 20 plots without asking a question.
+
+Better:
+
+> "What am I trying to understand?"
+
+---
+
+### ❌ Mistake 2
+
+Deleting every outlier.
+
+Remember:
+
+> **Outlier ≠ error**
+
+---
+
+### ❌ Mistake 3
+
+Assuming correlation means causation.
+
+It doesn't.
+
+---
+
+### ❌ Mistake 4
+
+Ignoring class imbalance.
+
+Especially dangerous in:
+
+* Fraud detection
+* Medical diagnosis
+* Intrusion detection
+* Rare-event prediction
+
+---
+
+### ❌ Mistake 5
+
+Only looking at averages.
+
+Two datasets can have the same mean and completely different distributions.
+
+---
+
+# 31. Interview Preparation 🎯
+
+## Q1. What is EDA?
+
+Strong answer:
+
+> "EDA is the systematic process of understanding a dataset before modeling using descriptive statistics and visualization. I use it to identify data-quality issues, distributions, outliers, relationships, class imbalance, and potential leakage, which helps guide preprocessing and model selection."
+
+---
+
+## Q2. How would you detect outliers?
+
+Mention multiple approaches:
+
+```text
+IQR
+Z-score
+Boxplots
+Domain rules
+Model-based methods
+```
+
+And add:
+
+> "I wouldn't automatically remove an outlier without checking whether it represents a valid observation."
+
+🔥
+
+---
+
+## Q3. Why is visualization important in ML?
+
+Strong answer:
+
+> "Visualization helps reveal patterns that summary statistics can hide, such as skewness, multimodal distributions, nonlinear relationships, class imbalance and outliers."
+
+---
+
+# 32. 🎤 60-Second Interview Script
+
+> "Before building an ML model, I perform EDA to understand the dataset. I first inspect its dimensions, data types, missing values and summary statistics. Then I examine individual feature distributions using histograms and boxplots, analyze relationships using scatter plots and correlation matrices, and compare numerical variables across categories. I also check class imbalance, potential outliers, and data leakage. The goal isn't simply to create charts; it's to form useful hypotheses and make informed decisions about preprocessing, feature engineering and modeling."
+
+---
+
+# 33. 🧠 Active Recall
+
+Without looking back, answer:
+
+1. What is EDA?
+2. Univariate vs bivariate analysis?
+3. When would you use a histogram?
+4. What does a boxplot show?
+5. What is IQR?
+6. How does IQR help detect potential outliers?
+7. Why shouldn't every outlier be removed?
+8. What does a scatter plot show?
+9. What does correlation measure?
+10. Why doesn't correlation imply causation?
+11. What is class imbalance?
+12. Why can accuracy be misleading with imbalanced data?
+13. What is skewness?
+14. Why is standard deviation important?
+15. What is the difference between descriptive statistics and visualization?
+
+---
+
+# 34. 🏆 Today's Theory → Practical Connection
+
+This is the progression you should internalize:
+
+```text
+              RAW DATA
+                  ↓
+               Pandas
+                  ↓
+          Descriptive Statistics
+                  ↓
+       ┌──────────┴──────────┐
+       ↓                     ↓
+   Histograms             Boxplots
+       ↓                     ↓
+   Distribution           Outliers
+       │                     │
+       └──────────┬──────────┘
+                  ↓
+            Scatter Plots
+                  ↓
+             Correlation
+                  ↓
+             Heatmaps
+                  ↓
+          Feature Engineering
+                  ↓
+             ML MODEL
+```
+
+---
+
+# 📊 AI/ML 120-Day Tracker
+
+|   Day | Topic                                    | Theory | Practical |
+| ----: | ---------------------------------------- | :----: | :-------: |
+|     1 | AI/ML roadmap & methodology              |    ✅   |     ✅     |
+|     2 | NumPy fundamentals                       |    ✅   |     ✅     |
+|     3 | Pandas + Data Cleaning + EDA             |    ✅   |     ✅     |
+| **4** | **Data Visualization + Statistical EDA** |   🔥   |     🔥    |
+
+### Current foundation
+
+```text
+Python
+   ↓
+NumPy ✅
+   ↓
+Pandas ✅
+   ↓
+EDA + Visualization ✅
+   ↓
+Statistics
+   ↓
+Scikit-learn
+   ↓
+Machine Learning
+```
+
+## 🔑 Day 4 takeaway
+
+> **EDA is not about making graphs. It is about using data and evidence to understand what you're dealing with before you trust a machine-learning model.**
+
+**Next: Day 5 — Statistics for Machine Learning: Mean, Variance, Probability, Distributions & the Bias–Variance intuition.**
