@@ -1,0 +1,1141 @@
+# 🚀 AI/ML ENGINEER — DAY 6/120
+
+## Probability & Statistics Deep Dive
+
+### Conditional Probability • Bayes' Theorem • Covariance • Correlation • Sampling
+
+Welcome to **Day 6** 🔥
+
+Yesterday we learned the fundamentals:
+
+> Mean → Variance → Standard Deviation → Probability → Distributions → Bias–Variance
+
+Today we go one level deeper and start connecting statistics directly to **machine-learning algorithms**.
+
+---
+
+# 🎯 TODAY'S OBJECTIVES
+
+By the end of today, you should understand:
+
+* Conditional probability
+* Independent vs dependent events
+* Bayes' theorem
+* Covariance
+* Correlation
+* Correlation ≠ causation
+* Sampling
+* Population vs sample
+* Confidence intervals
+* How these concepts appear in ML
+* How to implement the important concepts in Python
+
+---
+
+# 1️⃣ CONDITIONAL PROBABILITY
+
+## 🧠 Intuition
+
+Conditional probability asks:
+
+> **"What is the probability of A, given that I already know B happened?"**
+
+Notation:
+
+$$
+P(A|B)
+$$
+
+Read it as:
+
+> Probability of A **given B**.
+
+Formula:
+
+$$
+P(A|B)=\frac{P(A\cap B)}{P(B)}
+$$
+
+---
+
+## 🎯 Real-world example
+
+Suppose a company has:
+
+```text
+1000 employees
+```
+
+Among them:
+
+```text
+600 → use Python
+400 → don't use Python
+
+300 → use Python AND work in AI/ML
+```
+
+Question:
+
+> If we randomly select someone who uses Python, what's the probability that they work in AI/ML?
+
+We already know:
+
+```text
+Person uses Python
+```
+
+So our universe changes from:
+
+```text
+1000 employees
+```
+
+to:
+
+```text
+600 Python users
+```
+
+Therefore:
+
+$$
+P(AI/ML|Python)=\frac{300}{600}=0.5
+$$
+
+So:
+
+```text
+50%
+```
+
+### 🔥 Key idea
+
+Conditional probability **changes the reference group**.
+
+---
+
+# 2️⃣ INDEPENDENT EVENTS
+
+Two events are independent if knowing one happened doesn't change the probability of the other.
+
+For independent events:
+
+$$
+P(A|B)=P(A)
+$$
+
+Example:
+
+```text
+Coin toss #1
+Coin toss #2
+```
+
+The first toss doesn't affect the second.
+
+Therefore:
+
+```text
+P(Heads on toss 2 | Heads on toss 1)
+=
+P(Heads on toss 2)
+=
+0.5
+```
+
+---
+
+# 3️⃣ DEPENDENT EVENTS
+
+Suppose you have a deck of cards.
+
+You pick one card and **don't replace it**.
+
+Then pick another.
+
+The first draw changes the probability of the second draw.
+
+Therefore:
+
+```text
+First event
+     ↓
+changes
+     ↓
+Second event
+```
+
+These are dependent.
+
+---
+
+# 🧠 ML CONNECTION
+
+This idea appears everywhere.
+
+For example:
+
+```text
+Customer behavior
+      ↓
+Observed features
+      ↓
+Probability of churn
+```
+
+We may ask:
+
+$$
+P(Churn|Features)
+$$
+
+That's a conditional probability.
+
+---
+
+# 4️⃣ BAYES' THEOREM ⭐⭐⭐⭐⭐
+
+This is one of the most important probability concepts for ML.
+
+Bayes' theorem:
+
+$$
+P(A|B)=
+\frac{P(B|A)P(A)}
+{P(B)}
+$$
+
+It allows us to **reverse conditional probabilities**.
+
+---
+
+# 🧠 ELI5
+
+Imagine:
+
+> You know a person has a certain symptom.
+
+You want to know:
+
+> What's the probability they have a particular disease?
+
+You're interested in:
+
+$$
+P(Disease|Symptom)
+$$
+
+But medical studies may give you:
+
+$$
+P(Symptom|Disease)
+$$
+
+Bayes lets you connect them.
+
+---
+
+# 5️⃣ BAYES EXAMPLE
+
+Suppose:
+
+```text
+Disease prevalence = 1%
+```
+
+So:
+
+$$
+P(D)=0.01
+$$
+
+Suppose:
+
+```text
+If someone has the disease,
+test is positive 90% of the time.
+```
+
+Therefore:
+
+$$
+P(Positive|Disease)=0.90
+$$
+
+Suppose healthy people have:
+
+```text
+10% false-positive rate
+```
+
+Therefore:
+
+$$
+P(Positive|Healthy)=0.10
+$$
+
+Question:
+
+> If someone's test is positive, what's the probability they actually have the disease?
+
+We want:
+
+$$
+P(Disease|Positive)
+$$
+
+Bayes:
+
+$$
+P(D|P)
+=
+\frac{P(P|D)P(D)}
+{P(P)}
+$$
+
+Calculate:
+
+$$
+P(P)=
+P(P|D)P(D)
++
+P(P|Healthy)P(Healthy)
+$$
+
+$$
+=0.9(0.01)+0.1(0.99)
+$$
+
+$$
+=0.009+0.099
+$$
+
+$$
+=0.108
+$$
+
+Therefore:
+
+$$
+P(D|P)=
+\frac{0.009}{0.108}
+\approx0.0833
+$$
+
+So:
+
+```text
+≈ 8.33%
+```
+
+### 😮 Important insight
+
+Even with a 90% sensitive test, a positive result doesn't automatically mean a 90% chance of disease.
+
+Why?
+
+Because the disease is rare and false positives occur.
+
+This is called the **base-rate effect**.
+
+---
+
+# 6️⃣ BAYES IN MACHINE LEARNING
+
+Bayes' theorem is foundational to:
+
+### Naive Bayes
+
+Used for:
+
+* spam detection
+* text classification
+* sentiment analysis
+* document classification
+
+Conceptually:
+
+```text
+Email
+ ↓
+Words/features
+ ↓
+Probability calculations
+ ↓
+P(Spam | Words)
+ ↓
+Prediction
+```
+
+Example:
+
+```text
+Email:
+"Congratulations! You won money!"
+
+Model estimates:
+
+P(Spam | words) = 0.97
+P(Not Spam | words) = 0.03
+```
+
+Prediction:
+
+```text
+SPAM
+```
+
+---
+
+# 7️⃣ COVARIANCE ⭐⭐⭐
+
+Now we move from probability to relationships between variables.
+
+Covariance answers:
+
+> **"Do two variables tend to move together?"**
+
+Suppose:
+
+```text
+Hours studied ↑
+Exam score ↑
+```
+
+They tend to move in the same direction.
+
+Positive covariance.
+
+---
+
+### Negative relationship
+
+```text
+Exercise ↑
+Body fat ↓
+```
+
+They move in opposite directions.
+
+Negative covariance.
+
+---
+
+### No obvious relationship
+
+```text
+Shoe size
+Programming skill
+```
+
+Could have covariance close to zero.
+
+---
+
+# 🧠 Visual intuition
+
+### Positive covariance
+
+```text
+Y
+│          •
+│       •
+│    •
+│ •
+└──────────── X
+```
+
+Both increase.
+
+---
+
+### Negative covariance
+
+```text
+Y
+│ •
+│    •
+│       •
+│          •
+└──────────── X
+```
+
+X increases while Y decreases.
+
+---
+
+# 8️⃣ COVARIANCE FORMULA
+
+Population covariance:
+
+$$
+Cov(X,Y)=
+\frac{1}{N}
+\sum_{i=1}^{N}
+(x_i-\mu_x)(y_i-\mu_y)
+$$
+
+Don't worry about memorizing it yet.
+
+Understand the mechanism:
+
+```text
+X deviation from mean
+        ×
+Y deviation from mean
+        ↓
+Average
+        ↓
+Covariance
+```
+
+If deviations tend to have the same sign:
+
+```text
+positive
+```
+
+If opposite:
+
+```text
+negative
+```
+
+---
+
+# 9️⃣ CORRELATION ⭐⭐⭐⭐⭐
+
+Covariance has a problem.
+
+Its magnitude depends on the units.
+
+For example:
+
+```text
+Height → cm
+Salary → ₹
+```
+
+Covariance can become difficult to interpret.
+
+Correlation solves this by normalizing covariance.
+
+Pearson correlation:
+
+$$
+r=
+\frac{Cov(X,Y)}
+{\sigma_X\sigma_Y}
+$$
+
+Range:
+
+$$
+-1\leq r\leq1
+$$
+
+---
+
+# 🧠 Interpretation
+
+```text
+r = +1
+↓
+Perfect positive linear relationship
+
+r = 0
+↓
+No linear relationship
+
+r = -1
+↓
+Perfect negative linear relationship
+```
+
+Example:
+
+```text
+Hours studied ↑
+Score ↑
+```
+
+could have:
+
+```text
+r = +0.85
+```
+
+Strong positive linear relationship.
+
+---
+
+# 🔥 COVARIANCE vs CORRELATION
+
+| Feature               | Covariance | Correlation |
+| --------------------- | ---------- | ----------- |
+| Measures relationship | ✅          | ✅           |
+| Range                 | Unbounded  | -1 to +1    |
+| Unit dependent        | Yes        | No          |
+| Easy to interpret     | Less       | More        |
+| Used in ML            | Yes        | Very common |
+
+---
+
+# 🚨 IMPORTANT: CORRELATION ≠ CAUSATION
+
+This is an extremely important data-science concept.
+
+Suppose:
+
+```text
+Ice cream sales ↑
+Swimming accidents ↑
+```
+
+They are correlated.
+
+Does ice cream cause drowning?
+
+❌ No.
+
+A third factor could be:
+
+```text
+Summer temperature ↑
+       ↙       ↘
+Ice cream    Swimming
+sales ↑      ↑
+```
+
+Temperature is a **confounding variable**.
+
+---
+
+# 🧠 Interview answer
+
+> Correlation indicates that two variables are statistically associated, but it does not establish that one variable causes the other. Causal conclusions generally require additional evidence, such as controlled experiments or appropriate causal analysis.
+
+---
+
+# 🔟 PYTHON — COVARIANCE
+
+Let's use NumPy.
+
+```python
+import numpy as np
+
+hours = np.array([1, 2, 3, 4, 5])
+scores = np.array([50, 55, 65, 70, 80])
+
+covariance = np.cov(hours, scores)
+
+print(covariance)
+```
+
+You'll get a covariance matrix:
+
+```text
+[[variance(hours), covariance(hours,scores)],
+ [covariance(scores,hours), variance(scores)]]
+```
+
+The off-diagonal values represent covariance.
+
+---
+
+# 1️⃣1️⃣ PYTHON — CORRELATION
+
+```python
+correlation = np.corrcoef(hours, scores)
+
+print(correlation)
+```
+
+You'll get something like:
+
+```text
+[[1.00 0.99]
+ [0.99 1.00]]
+```
+
+The important value:
+
+```text
+0.99
+```
+
+means there is a very strong positive linear relationship.
+
+---
+
+# 1️⃣2️⃣ FROM SCRATCH — CORRELATION
+
+Let's understand the underlying calculation.
+
+```python
+import math
+
+x = [1, 2, 3, 4, 5]
+y = [50, 55, 65, 70, 80]
+
+mean_x = sum(x) / len(x)
+mean_y = sum(y) / len(y)
+
+numerator = 0
+sum_x_squared = 0
+sum_y_squared = 0
+
+for i in range(len(x)):
+    dx = x[i] - mean_x
+    dy = y[i] - mean_y
+
+    numerator += dx * dy
+    sum_x_squared += dx ** 2
+    sum_y_squared += dy ** 2
+
+correlation = numerator / math.sqrt(
+    sum_x_squared * sum_y_squared
+)
+
+print(correlation)
+```
+
+This is essentially implementing Pearson correlation from the mathematical definition.
+
+---
+
+# 1️⃣3️⃣ SAMPLING
+
+Now imagine you're building a model to predict customer churn.
+
+Your company has:
+
+```text
+10,000,000 customers
+```
+
+Do you always need to analyze all 10 million?
+
+Not necessarily.
+
+You can take a **sample**.
+
+```text
+Population
+10,000,000
+      ↓
+   Sample
+   10,000
+```
+
+---
+
+# Population vs Sample
+
+### Population
+
+The entire group we're interested in.
+
+```text
+All customers
+```
+
+### Sample
+
+A subset selected from that population.
+
+```text
+10,000 selected customers
+```
+
+---
+
+# Why Sampling?
+
+Because working with the entire population can be:
+
+* expensive
+* slow
+* computationally expensive
+* sometimes impossible
+
+Sampling lets us estimate population properties.
+
+---
+
+# 1️⃣4️⃣ SAMPLING METHODS
+
+## Simple Random Sampling
+
+Every member has an equal chance of being selected.
+
+```text
+1000 people
+ ↓
+Randomly select 100
+```
+
+---
+
+## Stratified Sampling
+
+Divide the population into groups and sample from each.
+
+Example:
+
+```text
+Customers
+
+        ┌──────────────┐
+        │ Customers    │
+        └──────┬───────┘
+               │
+      ┌────────┼────────┐
+      ↓        ↓        ↓
+    India     USA      UK
+      ↓        ↓        ↓
+    Sample   Sample   Sample
+```
+
+Useful when different groups need representation.
+
+---
+
+## Systematic Sampling
+
+Select every kth observation.
+
+Example:
+
+```text
+Every 10th customer
+```
+
+---
+
+# 1️⃣5️⃣ SAMPLING BIAS 🚨
+
+A bad sample can produce a misleading model.
+
+Suppose you're studying:
+
+> Smartphone usage among college students.
+
+You survey only:
+
+```text
+Computer Science students
+```
+
+Your sample may not represent:
+
+```text
+All college students
+```
+
+This is sampling bias.
+
+---
+
+# 1️⃣6️⃣ CONFIDENCE INTERVAL
+
+Suppose you sample:
+
+```text
+1000 customers
+```
+
+and calculate:
+
+```text
+Average monthly spending = ₹2,000
+```
+
+But the actual population mean isn't necessarily exactly ₹2,000.
+
+A confidence interval gives us a range reflecting uncertainty around an estimate.
+
+Conceptually:
+
+```text
+Estimated mean
+      ↓
+₹2,000
+      │
+ ┌────┴────┐
+ ↓         ↓
+₹1,950    ₹2,050
+```
+
+You might report a confidence interval such as:
+
+```text
+₹1,950 – ₹2,050
+```
+
+The exact calculation depends on the assumptions and estimator being used.
+
+---
+
+# ⚠️ COMMON MISUNDERSTANDING
+
+A 95% confidence interval does **not** strictly mean:
+
+> "There is a 95% probability that this particular fixed population parameter lies inside this interval."
+
+In classical frequentist statistics, the parameter is treated as fixed; the interval-producing procedure has 95% coverage in repeated sampling under its assumptions.
+
+For interviews, a practical explanation is:
+
+> A 95% confidence interval is a range produced by a method designed to capture the true parameter in about 95% of repeated samples, assuming the method's conditions hold.
+
+---
+
+# 1️⃣7️⃣ PRACTICAL ML EXAMPLE
+
+Let's combine today's concepts.
+
+Imagine you're building a **customer churn model**.
+
+Dataset:
+
+```text
+Customer
+│
+├── Age
+├── Monthly Bill
+├── Login Frequency
+├── Support Tickets
+└── Churn
+```
+
+### Step 1 — Probability
+
+Estimate:
+
+$$
+P(Churn)
+$$
+
+---
+
+### Step 2 — Conditional probability
+
+Estimate:
+
+$$
+P(Churn|HighBill)
+$$
+
+---
+
+### Step 3 — Bayes
+
+Reverse conditional relationships when appropriate:
+
+$$
+P(Churn|Features)
+$$
+
+---
+
+### Step 4 — Covariance
+
+Check how variables move together.
+
+```text
+Support tickets ↑
+Churn ↑
+```
+
+---
+
+### Step 5 — Correlation
+
+Measure the strength of a linear relationship.
+
+---
+
+### Step 6 — Sampling
+
+Use representative customer samples for analysis/training when appropriate.
+
+---
+
+### Step 7 — Model
+
+Train an ML model.
+
+```text
+Raw Data
+   ↓
+Sampling / Collection
+   ↓
+EDA
+   ↓
+Statistics
+   ↓
+Feature Engineering
+   ↓
+ML Model
+   ↓
+Prediction
+```
+
+You're beginning to see how **statistics becomes the foundation underneath ML**.
+
+---
+
+# 1️⃣8️⃣ 🧪 TODAY'S PRACTICAL LAB
+
+Run this:
+
+```python
+import numpy as np
+
+hours = np.array([1, 2, 3, 4, 5, 6, 7, 8])
+scores = np.array([42, 48, 55, 61, 67, 73, 80, 86])
+
+print("Mean hours:", np.mean(hours))
+print("Mean score:", np.mean(scores))
+
+print("Covariance:")
+print(np.cov(hours, scores))
+
+print("Correlation:")
+print(np.corrcoef(hours, scores))
+```
+
+Then create:
+
+```python
+study_hours = np.array([
+    1, 2, 2, 3, 4,
+    5, 6, 7, 8, 9
+])
+
+marks = np.array([
+    40, 45, 50, 55, 60,
+    68, 72, 78, 85, 90
+])
+```
+
+Calculate:
+
+```text
+Mean
+Variance
+Standard deviation
+Covariance
+Correlation
+```
+
+Then answer:
+
+### Challenge
+
+**1.** Is the relationship positive or negative?
+
+**2.** Is the relationship weak or strong?
+
+**3.** Does high study time *prove* that studying causes higher marks?
+
+**4.** What other factors could influence marks?
+
+This last question is where you start thinking like an **ML engineer rather than someone simply calculating statistics.**
+
+---
+
+# 🎯 DAY 6 INTERVIEW CHEAT SHEET
+
+Remember:
+
+```text
+Conditional Probability
+        ↓
+Probability given information
+
+Bayes
+        ↓
+Reverse conditional probability
+
+Covariance
+        ↓
+Direction of joint movement
+
+Correlation
+        ↓
+Strength + direction of linear relationship
+
+Sampling
+        ↓
+Use subset to learn about population
+
+Sampling Bias
+        ↓
+Bad sample → misleading conclusions
+
+Confidence Interval
+        ↓
+Quantifies uncertainty around an estimate
+```
+
+And the golden rule:
+
+> **Correlation does not imply causation.**
+
+---
+
+# 🧠 DAY 6 FINAL MINDMAP
+
+```text
+             PROBABILITY & STATISTICS
+                       │
+        ┌──────────────┼──────────────┐
+        ↓              ↓              ↓
+ Conditional        Bayes         Sampling
+ Probability       Theorem           │
+        │              │          ┌───┴────┐
+        ↓              ↓          ↓        ↓
+   P(A|B)        P(A|B)        Population Sample
+                       │                    │
+                       ↓                    ↓
+                 Naive Bayes          Sampling Bias
+                       │
+                       ↓
+                 ML Classification
+
+                       │
+                       ↓
+                RELATIONSHIPS
+                       │
+                ┌──────┴──────┐
+                ↓             ↓
+           Covariance     Correlation
+                │             │
+                ↓             ↓
+         Joint movement   -1 → +1
+                              │
+                              ↓
+                     Correlation ≠
+                        Causation
+                              │
+                              ↓
+                     ML Feature Analysis
+```
+
+---
+
+## ✅ YOUR AI/ML TRACKER
+
+**Day 1** → AI/ML roadmap + methodology
+**Day 2** → NumPy fundamentals
+**Day 3** → Pandas + Data Cleaning + EDA
+**Day 4** → Data Visualization + Statistical EDA
+**Day 5** → Statistics: Mean, Variance, Probability, Distributions + Bias–Variance
+**Day 6** → **Conditional Probability, Bayes, Covariance, Correlation + Sampling** ✅
+
+### 🔜 DAY 7
+
+**Linear Algebra for Machine Learning — Vectors, Matrices, Dot Product, Matrix Multiplication, Norms, Linear Transformations + implementing ML mathematics with NumPy.**
