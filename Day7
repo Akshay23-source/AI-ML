@@ -1,0 +1,1209 @@
+# 🚀 AI/ML ENGINEER — DAY 8/120
+
+## Linear Algebra Deep Dive
+
+### Eigenvalues • Eigenvectors • Projections • PCA • Dimensionality Reduction
+
+🔥 **Day 8 starts now.**
+
+Yesterday you learned how ML uses vectors and matrices to calculate predictions.
+
+Today we answer a deeper question:
+
+> **How can we transform a large dataset into a smaller, more useful representation while preserving the important information?**
+
+That takes us to **Eigenvectors → Eigenvalues → PCA**.
+
+---
+
+# 🎯 TODAY'S LEARNING GOALS
+
+By the end of today, you should understand:
+
+* Matrix properties
+* Eigenvectors
+* Eigenvalues
+* Geometric intuition
+* Projections
+* Covariance matrices
+* PCA
+* Dimensionality reduction
+* Why PCA works
+* PCA from scratch conceptually
+* PCA using scikit-learn
+* When PCA should and shouldn't be used
+
+---
+
+# 1️⃣ FIRST — WHY DO WE NEED PCA?
+
+Imagine a dataset with **100 features**:
+
+```text
+Age
+Salary
+Experience
+Education
+...
+Feature 100
+```
+
+Training with 100 features can sometimes be unnecessary.
+
+Maybe many features contain overlapping information.
+
+For example:
+
+```text
+Age
+Years of Experience
+Years Since Graduation
+```
+
+may be strongly related.
+
+We might want to transform:
+
+```text
+100 features
+     ↓
+PCA
+     ↓
+10 important components
+```
+
+This is called:
+
+> **Dimensionality Reduction**
+
+---
+
+# 2️⃣ WHAT IS DIMENSIONALITY?
+
+If one data point is:
+
+```text
+[Age, Salary]
+```
+
+it has:
+
+```text
+2 dimensions
+```
+
+If:
+
+```text
+[Age, Salary, Experience, Education]
+```
+
+it has:
+
+```text
+4 dimensions
+```
+
+Machine-learning datasets can contain hundreds or thousands of dimensions.
+
+The problem:
+
+```text
+More dimensions
+      ↓
+More computation
+      ↓
+More storage
+      ↓
+Potential noise
+      ↓
+Visualization becomes difficult
+```
+
+---
+
+# 3️⃣ THE CORE IDEA OF PCA 🧠
+
+PCA = **Principal Component Analysis**
+
+The basic idea:
+
+> **Find new directions in the data that capture the greatest amount of variation.**
+
+Instead of keeping the original axes:
+
+```text
+Age
+Salary
+```
+
+PCA can create new axes:
+
+```text
+Principal Component 1
+Principal Component 2
+```
+
+These new axes are combinations of the original features.
+
+---
+
+# 4️⃣ VISUAL INTUITION
+
+Imagine points like this:
+
+```text
+Salary
+  ↑
+  │                 •
+  │             •
+  │          •
+  │       •
+  │    •
+  │ •
+  └────────────────────→ Age
+```
+
+Notice something?
+
+The points aren't randomly distributed.
+
+They roughly follow a diagonal direction.
+
+PCA discovers:
+
+```text
+       PC1
+        ↗
+       /
+      /
+     /
+```
+
+That direction contains the **largest variation**.
+
+That's our first principal component.
+
+---
+
+# 5️⃣ WHAT IS AN EIGENVECTOR?
+
+This sounds scary initially.
+
+Don't memorize the formula yet.
+
+Think of a matrix as a transformation machine:
+
+```text
+Vector
+  ↓
+Matrix
+  ↓
+Transformed Vector
+```
+
+Usually the vector changes both:
+
+```text
+direction
+magnitude
+```
+
+But some special vectors maintain their direction.
+
+They may only be stretched or compressed.
+
+Those are:
+
+> **Eigenvectors**
+
+---
+
+# 6️⃣ EIGENVALUE
+
+The amount by which the eigenvector is scaled is its:
+
+> **Eigenvalue**
+
+Mathematically:
+
+$$
+Av=\lambda v
+$$
+
+Where:
+
+```text
+A = matrix
+v = eigenvector
+λ = eigenvalue
+```
+
+Read it as:
+
+> Matrix A transforms vector v, but the result is simply the same direction multiplied by λ.
+
+---
+
+# 🧠 ELI5
+
+Imagine a rubber arrow.
+
+A transformation stretches it.
+
+Most arrows:
+
+```text
+↗
+```
+
+might rotate.
+
+But one special arrow:
+
+```text
+→
+```
+
+might remain pointing in the same direction while becoming longer:
+
+```text
+→→→
+```
+
+That arrow is an eigenvector.
+
+The stretch factor is the eigenvalue.
+
+---
+
+# 7️⃣ SIMPLE EXAMPLE
+
+Consider:
+
+$$
+A=
+\begin{bmatrix}
+2&0\\
+0&3
+\end{bmatrix}
+$$
+
+Take:
+
+$$
+v=
+\begin{bmatrix}
+1\\
+0
+\end{bmatrix}
+$$
+
+Calculate:
+
+$$
+Av=
+\begin{bmatrix}
+2&0\\
+0&3
+\end{bmatrix}
+\begin{bmatrix}
+1\\
+0
+\end{bmatrix}
+$$
+
+Result:
+
+$$
+=
+\begin{bmatrix}
+2\\
+0
+\end{bmatrix}
+$$
+
+Which is:
+
+$$
+2
+\begin{bmatrix}
+1\\
+0
+\end{bmatrix}
+$$
+
+Therefore:
+
+```text
+Eigenvector = [1,0]
+Eigenvalue = 2
+```
+
+---
+
+# 8️⃣ ANOTHER EIGENVECTOR
+
+Take:
+
+$$
+v=
+\begin{bmatrix}
+0\\
+1
+\end{bmatrix}
+$$
+
+Then:
+
+$$
+Av=
+\begin{bmatrix}
+0\\
+3
+\end{bmatrix}
+$$
+
+Therefore:
+
+```text
+Eigenvector = [0,1]
+Eigenvalue = 3
+```
+
+So the matrix has two important directions:
+
+```text
+x direction → eigenvalue 2
+y direction → eigenvalue 3
+```
+
+The second direction is stretched more.
+
+---
+
+# 9️⃣ WHY DOES THIS MATTER FOR PCA?
+
+This is the important connection.
+
+PCA uses eigenvectors of the **covariance matrix**.
+
+The eigenvectors represent:
+
+> Important directions in the data.
+
+The eigenvalues represent:
+
+> How much variance exists in those directions.
+
+So:
+
+```text
+Covariance Matrix
+       ↓
+Eigenvectors
+       ↓
+Principal directions
+
+Eigenvalues
+       ↓
+Amount of variance
+```
+
+🔥 This is the mathematical heart of PCA.
+
+---
+
+# 🔟 COVARIANCE MATRIX
+
+Yesterday we learned covariance.
+
+For multiple features, we can calculate covariance between every pair.
+
+Suppose:
+
+```text
+X = [Age, Salary]
+```
+
+We get:
+
+$$
+Cov(X)=
+\begin{bmatrix}
+Var(Age) & Cov(Age,Salary)\\
+Cov(Salary,Age) & Var(Salary)
+\end{bmatrix}
+$$
+
+Example:
+
+$$
+\begin{bmatrix}
+4&8\\
+8&25
+\end{bmatrix}
+$$
+
+Diagonal:
+
+```text
+4  → variance of Age
+25 → variance of Salary
+```
+
+Off-diagonal:
+
+```text
+8 → covariance
+```
+
+---
+
+# 1️⃣1️⃣ PCA PIPELINE ⭐⭐⭐⭐⭐
+
+This is worth understanding extremely well.
+
+```text
+Raw Dataset
+     ↓
+Standardize Features
+     ↓
+Calculate Covariance Matrix
+     ↓
+Calculate Eigenvalues
+     ↓
+Calculate Eigenvectors
+     ↓
+Sort by Eigenvalues
+     ↓
+Select Top Components
+     ↓
+Project Data
+     ↓
+Reduced Dataset
+```
+
+That's PCA.
+
+---
+
+# 1️⃣2️⃣ WHY STANDARDIZE BEFORE PCA?
+
+Suppose:
+
+```text
+Age:
+20–60
+
+Salary:
+20,000–2,00,000
+```
+
+Salary has much larger numerical scale.
+
+Without scaling, salary could dominate the variance calculation.
+
+So commonly:
+
+```text
+Original data
+      ↓
+StandardScaler
+      ↓
+PCA
+```
+
+Remember:
+
+> PCA is variance-based, so feature scale can strongly affect it.
+
+---
+
+# 1️⃣3️⃣ STANDARDIZATION
+
+We learned this earlier.
+
+$$
+z=\frac{x-\mu}{\sigma}
+$$
+
+Python:
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+```
+
+Now features have approximately:
+
+```text
+Mean = 0
+Std = 1
+```
+
+---
+
+# 1️⃣4️⃣ PCA USING SCIKIT-LEARN
+
+Let's create a dataset.
+
+```python
+import numpy as np
+
+X = np.array([
+    [2, 50],
+    [3, 60],
+    [4, 70],
+    [5, 80],
+    [6, 90]
+])
+```
+
+Scale it:
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+
+print(X_scaled)
+```
+
+Now PCA:
+
+```python
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=1)
+
+X_reduced = pca.fit_transform(X_scaled)
+
+print(X_reduced)
+```
+
+We started with:
+
+```text
+5 samples × 2 features
+```
+
+and obtained:
+
+```text
+5 samples × 1 component
+```
+
+So:
+
+```text
+2 dimensions
+    ↓
+PCA
+    ↓
+1 dimension
+```
+
+---
+
+# 1️⃣5️⃣ EXPLAINED VARIANCE ⭐⭐⭐⭐⭐
+
+This is one of the most important PCA outputs.
+
+```python
+print(pca.explained_variance_ratio_)
+```
+
+Suppose you get:
+
+```text
+[0.98]
+```
+
+This means approximately:
+
+> The first principal component explains 98% of the variance in the standardized dataset.
+
+If:
+
+```text
+PC1 = 98%
+PC2 = 2%
+```
+
+then keeping PC1 alone may preserve most of the variation.
+
+---
+
+# 1️⃣6️⃣ HOW DO WE CHOOSE NUMBER OF COMPONENTS?
+
+Suppose:
+
+```text
+PC1 → 60%
+PC2 → 20%
+PC3 → 10%
+PC4 → 5%
+PC5 → 3%
+PC6 → 2%
+```
+
+Cumulative:
+
+```text
+PC1 = 60%
+PC1+PC2 = 80%
+PC1+PC2+PC3 = 90%
+```
+
+If you want approximately 90% variance:
+
+```text
+Choose 3 components
+```
+
+This is called:
+
+> **Cumulative explained variance**
+
+---
+
+# 1️⃣7️⃣ PCA IS NOT FEATURE SELECTION
+
+Very important distinction.
+
+### Feature selection
+
+Keeps original features:
+
+```text
+Age
+Salary
+Experience
+```
+
+Maybe selects:
+
+```text
+Age
+Salary
+```
+
+---
+
+### PCA
+
+Creates completely new features:
+
+```text
+PC1
+PC2
+PC3
+```
+
+Each component can be a combination of many original features.
+
+Therefore:
+
+> PCA is **feature transformation**, not simply feature selection.
+
+---
+
+# 1️⃣8️⃣ PROJECTION
+
+PCA ultimately projects data onto the selected principal components.
+
+Imagine:
+
+```text
+        •
+      •
+    •
+  •
+──────────────────
+        PC1
+```
+
+Instead of representing each point with:
+
+```text
+x + y
+```
+
+we represent it primarily along:
+
+```text
+PC1
+```
+
+So a 2D dataset can become:
+
+```text
+2D → 1D
+```
+
+while preserving as much variance as possible.
+
+---
+
+# 1️⃣9️⃣ REAL-WORLD APPLICATIONS
+
+## 🏦 Finance
+
+Suppose a financial dataset has:
+
+```text
+100 indicators
+```
+
+Many are correlated.
+
+PCA can create fewer components representing major patterns.
+
+---
+
+## 🧬 Healthcare
+
+Gene-expression datasets can contain:
+
+```text
+thousands of features
+```
+
+PCA can reduce dimensionality for:
+
+* visualization
+* exploratory analysis
+* downstream modeling
+
+---
+
+## 🖼️ Computer Vision
+
+An image can have thousands of pixel features.
+
+PCA can sometimes compress or transform the representation.
+
+---
+
+## 📊 Visualization
+
+Suppose your dataset has:
+
+```text
+50 dimensions
+```
+
+You can't visualize 50D directly.
+
+PCA can reduce it to:
+
+```text
+2D
+```
+
+and allow visualization.
+
+---
+
+# 2️⃣0️⃣ WHEN PCA IS USEFUL
+
+PCA can help when:
+
+* features are highly correlated
+* dimensionality is very high
+* visualization is needed
+* dimensionality reduction is beneficial
+* noise/redundancy needs to be reduced
+* computational efficiency matters
+
+---
+
+# 2️⃣1️⃣ WHEN PCA CAN BE A BAD IDEA
+
+PCA has limitations.
+
+### ❌ Interpretability
+
+Original features:
+
+```text
+Age
+Salary
+Experience
+```
+
+are easy to explain.
+
+But:
+
+```text
+PC1 = 0.41 Age + 0.63 Salary - 0.28 Experience + ...
+```
+
+is harder to interpret.
+
+---
+
+### ❌ Information loss
+
+If you reduce:
+
+```text
+100 dimensions → 2
+```
+
+you will generally lose some information.
+
+---
+
+### ❌ PCA is linear
+
+Standard PCA finds linear combinations.
+
+It may not capture complicated nonlinear structures.
+
+For nonlinear dimensionality reduction, other approaches exist, such as:
+
+* Kernel PCA
+* t-SNE
+* UMAP
+* autoencoders
+
+---
+
+# 2️⃣2️⃣ PCA FROM SCRATCH — CONCEPTUAL IMPLEMENTATION
+
+Let's implement the important pipeline ourselves.
+
+```python
+import numpy as np
+
+X = np.array([
+    [2, 50],
+    [3, 60],
+    [4, 70],
+    [5, 80],
+    [6, 90]
+], dtype=float)
+```
+
+### Step 1 — Center the data
+
+```python
+X_centered = X - np.mean(X, axis=0)
+
+print(X_centered)
+```
+
+---
+
+### Step 2 — Covariance matrix
+
+```python
+cov_matrix = np.cov(X_centered, rowvar=False)
+
+print(cov_matrix)
+```
+
+---
+
+### Step 3 — Eigenvalues/eigenvectors
+
+```python
+eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+
+print("Eigenvalues:")
+print(eigenvalues)
+
+print("Eigenvectors:")
+print(eigenvectors)
+```
+
+---
+
+### Step 4 — Sort eigenvalues
+
+```python
+idx = np.argsort(eigenvalues)[::-1]
+
+eigenvalues = eigenvalues[idx]
+eigenvectors = eigenvectors[:, idx]
+```
+
+Now the largest eigenvalue comes first.
+
+---
+
+### Step 5 — Select principal component
+
+```python
+principal_component = eigenvectors[:, 0]
+```
+
+---
+
+### Step 6 — Project data
+
+```python
+X_pca = X_centered @ principal_component
+
+print(X_pca)
+```
+
+🎯 You just implemented the core idea of PCA.
+
+You can later compare this with:
+
+```python
+PCA(n_components=1)
+```
+
+from scikit-learn.
+
+---
+
+# 2️⃣3️⃣ EXPERT CONNECTION
+
+Here's the deeper mathematical relationship:
+
+```text
+Dataset
+  ↓
+Center
+  ↓
+Covariance Matrix
+  ↓
+Eigen Decomposition
+  ↓
+Eigenvectors
+  ↓
+Principal Directions
+```
+
+And:
+
+```text
+Eigenvalues
+      ↓
+Variance captured
+```
+
+Therefore:
+
+> **PCA chooses eigenvectors corresponding to the largest eigenvalues.**
+
+That sentence is extremely important for interviews.
+
+---
+
+# 2️⃣4️⃣ INTERVIEW PREP 🎯
+
+### Q1. What is PCA?
+
+> PCA is a dimensionality-reduction technique that transforms correlated features into a smaller set of uncorrelated principal components while retaining as much variance as possible.
+
+---
+
+### Q2. What are eigenvectors in PCA?
+
+> Eigenvectors of the covariance matrix represent the principal directions or axes of maximum variance in the data.
+
+---
+
+### Q3. What do eigenvalues represent?
+
+> Eigenvalues indicate the amount of variance captured along their corresponding eigenvectors.
+
+---
+
+### Q4. Why standardize data before PCA?
+
+> PCA is based on variance, so features with larger numerical scales can dominate the result. Standardization puts features on a comparable scale before calculating the covariance structure.
+
+---
+
+### Q5. PCA vs feature selection?
+
+> Feature selection chooses a subset of the original features, whereas PCA creates new features called principal components from combinations of the original features.
+
+---
+
+# 2️⃣5️⃣ 🧪 TODAY'S PRACTICAL LAB
+
+Use this dataset:
+
+```python
+import numpy as np
+
+X = np.array([
+    [10, 100],
+    [12, 120],
+    [14, 140],
+    [16, 160],
+    [18, 180],
+    [20, 200]
+], dtype=float)
+```
+
+### Task 1
+
+Calculate:
+
+```text
+Mean
+Variance
+Covariance matrix
+```
+
+---
+
+### Task 2
+
+Find:
+
+```python
+eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+```
+
+---
+
+### Task 3
+
+Identify:
+
+> Which eigenvalue is largest?
+
+---
+
+### Task 4
+
+Find:
+
+> Which eigenvector corresponds to the largest eigenvalue?
+
+---
+
+### Task 5
+
+Use:
+
+```python
+from sklearn.decomposition import PCA
+```
+
+and reduce the dataset to:
+
+```text
+1 component
+```
+
+---
+
+### Task 6
+
+Print:
+
+```python
+pca.explained_variance_ratio_
+```
+
+Then explain in your own words:
+
+> **"How much information did PC1 retain?"**
+
+---
+
+# 🔥 DAY 8 CHALLENGE
+
+Without looking at the explanation above, answer these 5 questions:
+
+### 1.
+
+What is the difference between an eigenvector and eigenvalue?
+
+### 2.
+
+Why does PCA use a covariance matrix?
+
+### 3.
+
+Why are larger eigenvalues important?
+
+### 4.
+
+Why should features often be standardized before PCA?
+
+### 5.
+
+Why is PCA called dimensionality reduction?
+
+If you can answer these **without memorizing**, you've understood today's lesson.
+
+---
+
+# 🧠 DAY 8 MASTER MINDMAP
+
+```text
+                    LINEAR ALGEBRA
+                          │
+                          ↓
+                     COVARIANCE
+                       MATRIX
+                          │
+                 ┌────────┴────────┐
+                 ↓                 ↓
+            Eigenvectors       Eigenvalues
+                 │                 │
+                 ↓                 ↓
+          Directions          Variance
+          of data             captured
+                 │                 │
+                 └────────┬────────┘
+                          ↓
+                         PCA
+                          │
+             ┌────────────┼────────────┐
+             ↓            ↓            ↓
+          Transform     Reduce       Preserve
+          Features     Dimensions    Variance
+             │            │            │
+             └────────────┼────────────┘
+                          ↓
+                   Principal
+                   Components
+                          │
+            ┌─────────────┼─────────────┐
+            ↓             ↓             ↓
+       Visualization   Compression   ML preprocessing
+```
+
+---
+
+# 📚 YOUR AI/ML TRACKER
+
+| Day   | Topic                                                                   |
+| ----- | ----------------------------------------------------------------------- |
+| 1     | AI/ML Roadmap + Methodology ✅                                           |
+| 2     | NumPy Fundamentals ✅                                                    |
+| 3     | Pandas + Data Cleaning + EDA ✅                                          |
+| 4     | Data Visualization + Statistical EDA ✅                                  |
+| 5     | Statistics + Probability + Bias–Variance ✅                              |
+| 6     | Conditional Probability + Bayes + Correlation + Sampling ✅              |
+| 7     | Linear Algebra: Vectors, Matrices, Dot Product, Matrix Multiplication ✅ |
+| **8** | **Eigenvalues, Eigenvectors, PCA + Dimensionality Reduction 🔥**        |
+
+## 🔜 DAY 9
+
+**Calculus for Machine Learning — Functions, derivatives, gradients, partial derivatives, chain rule, gradient descent intuition, and why derivatives are the engine behind model training.**
+
+Today you've crossed an important bridge:
+
+**Statistics → Linear Algebra → PCA → Machine Learning**
+
+Next we connect **calculus → optimization → model training**.
