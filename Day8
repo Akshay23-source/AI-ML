@@ -1,0 +1,1532 @@
+# 🚀 AI/ML ENGINEER — DAY 9/120
+
+## Calculus for Machine Learning
+
+### Derivatives • Gradients • Partial Derivatives • Chain Rule • Gradient Descent
+
+🔥 **Day 9 is where the mathematics starts explaining how an ML model actually learns.**
+
+So far:
+
+```text
+Data
+ ↓
+Statistics
+ ↓
+Linear Algebra
+ ↓
+PCA
+ ↓
+TODAY → Calculus
+ ↓
+Optimization
+ ↓
+Model Training
+```
+
+The central question today is:
+
+> **How does a machine-learning model know which direction to change its parameters to make its predictions better?**
+
+The answer begins with **derivatives and gradients**.
+
+---
+
+# 🎯 TODAY'S GOALS
+
+By the end of today, you should understand:
+
+* What a function is
+* Derivative intuition
+* Slope
+* Partial derivatives
+* Gradient
+* Chain rule
+* Loss function
+* Gradient descent
+* Learning rate
+* Local minima
+* Why gradient descent is used in ML
+* A gradient-descent algorithm from scratch
+* How this connects to neural networks
+
+---
+
+# 1️⃣ THE CORE IDEA
+
+Imagine a model makes a prediction:
+
+```text
+Actual = 100
+Prediction = 70
+```
+
+The model is wrong.
+
+We calculate a **loss**:
+
+```text
+Prediction
+    ↓
+Compare with actual
+    ↓
+Loss
+```
+
+Now the model needs to answer:
+
+> "Which parameters should I change, and by how much?"
+
+That's the optimization problem.
+
+```text
+Model parameters
+       ↓
+Prediction
+       ↓
+Loss
+       ↓
+Gradient
+       ↓
+Update parameters
+       ↓
+New prediction
+       ↓
+Lower loss
+```
+
+This loop happens repeatedly during training.
+
+---
+
+# 2️⃣ WHAT IS A FUNCTION?
+
+A function maps an input to an output.
+
+For example:
+
+$$
+y=x^2
+$$
+
+If:
+
+$$
+x=3
+$$
+
+then:
+
+$$
+y=9
+$$
+
+Python:
+
+```python
+def f(x):
+    return x ** 2
+
+print(f(3))
+```
+
+Output:
+
+```text
+9
+```
+
+---
+
+# 3️⃣ WHAT IS A DERIVATIVE?
+
+A derivative tells us:
+
+> **How quickly does the output change when the input changes?**
+
+For:
+
+$$
+y=x^2
+$$
+
+the derivative is:
+
+$$
+\frac{dy}{dx}=2x
+$$
+
+At:
+
+$$
+x=3
+$$
+
+the derivative is:
+
+$$
+2(3)=6
+$$
+
+So the slope at `x = 3` is:
+
+```text
+6
+```
+
+---
+
+# 🧠 ELI5 INTUITION
+
+Imagine you're standing on a hill.
+
+```text
+        ●
+       /
+      /
+     /
+____/____________
+```
+
+The derivative tells you:
+
+> **How steep is the hill at your current position?**
+
+Positive:
+
+```text
+↗
+```
+
+You're going uphill.
+
+Negative:
+
+```text
+↘
+```
+
+You're going downhill.
+
+Zero:
+
+```text
+──
+```
+
+You're at a flat point.
+
+---
+
+# 4️⃣ WHY DOES ML CARE ABOUT SLOPE?
+
+Imagine this is the loss function:
+
+```text
+Loss
+ ↑
+ │\
+ │ \
+ │  \
+ │   \____
+ │        \____
+ │             \
+ └────────────────→ Parameter
+```
+
+We want:
+
+```text
+LOWEST LOSS
+```
+
+So the model needs to determine:
+
+> Which direction should I move?
+
+The derivative provides that information.
+
+---
+
+# 5️⃣ SIMPLE DERIVATIVE EXAMPLE
+
+Consider:
+
+$$
+f(x)=x^2
+$$
+
+Derivative:
+
+$$
+f'(x)=2x
+$$
+
+At:
+
+```text
+x = 5
+```
+
+we get:
+
+$$
+f'(5)=10
+$$
+
+At:
+
+```text
+x = -5
+```
+
+we get:
+
+$$
+f'(-5)=-10
+$$
+
+Notice:
+
+```text
+x = +5 → positive gradient
+x = -5 → negative gradient
+```
+
+This tells us which direction we should move.
+
+---
+
+# 6️⃣ THE POWER RULE
+
+A common rule:
+
+$$
+\frac{d}{dx}x^n=nx^{n-1}
+$$
+
+Examples:
+
+$$
+\frac{d}{dx}x^2=2x
+$$
+
+$$
+\frac{d}{dx}x^3=3x^2
+$$
+
+$$
+\frac{d}{dx}x^4=4x^3
+$$
+
+---
+
+# 7️⃣ CONSTANTS
+
+Derivative of a constant:
+
+$$
+\frac{d}{dx}(5)=0
+$$
+
+Why?
+
+Because:
+
+```text
+5
+5
+5
+5
+```
+
+doesn't change.
+
+Its slope is:
+
+```text
+0
+```
+
+---
+
+# 8️⃣ PARTIAL DERIVATIVES ⭐⭐⭐⭐⭐
+
+Real ML models have multiple parameters.
+
+For example:
+
+$$
+f(x,y)=x^2+y^2
+$$
+
+We have two variables:
+
+```text
+x
+y
+```
+
+We can calculate how the output changes with respect to each one.
+
+For x:
+
+$$
+\frac{\partial f}{\partial x}=2x
+$$
+
+For y:
+
+$$
+\frac{\partial f}{\partial y}=2y
+$$
+
+These are called **partial derivatives**.
+
+---
+
+# 🧠 Why?
+
+Imagine a mountain.
+
+You can move:
+
+```text
+North/South
+East/West
+```
+
+The slope in each direction can be different.
+
+Partial derivatives tell us the slope with respect to each variable.
+
+---
+
+# 9️⃣ GRADIENT ⭐⭐⭐⭐⭐
+
+Collect all partial derivatives together:
+
+$$
+\nabla f=
+\begin{bmatrix}
+\frac{\partial f}{\partial x}\\
+\frac{\partial f}{\partial y}
+\end{bmatrix}
+$$
+
+This is called the **gradient**.
+
+For:
+
+$$
+f(x,y)=x^2+y^2
+$$
+
+the gradient is:
+
+$$
+\nabla f=
+\begin{bmatrix}
+2x\\
+2y
+\end{bmatrix}
+$$
+
+At:
+
+```text
+x = 3
+y = 4
+```
+
+gradient:
+
+$$
+\begin{bmatrix}
+6\\
+8
+\end{bmatrix}
+$$
+
+---
+
+# 🔥 IMPORTANT INTUITION
+
+The gradient points in the direction of **steepest increase**.
+
+But ML wants:
+
+```text
+LOWER LOSS
+```
+
+Therefore we move in the **opposite direction**.
+
+That's why gradient descent uses:
+
+$$
+-\nabla f
+$$
+
+---
+
+# 🔟 GRADIENT DESCENT
+
+The fundamental equation:
+
+$$
+\boxed{
+\theta_{new}
+=
+\theta_{old}
+-
+\alpha\nabla L(\theta)
+}
+$$
+
+Where:
+
+```text
+θ = model parameters
+α = learning rate
+L = loss function
+∇L = gradient
+```
+
+This equation is one of the most important equations in ML.
+
+---
+
+# 1️⃣1️⃣ WHAT IS LEARNING RATE?
+
+Learning rate controls:
+
+> **How large a step the model takes during each update.**
+
+Suppose:
+
+```text
+gradient = 10
+```
+
+and:
+
+```text
+learning rate = 0.1
+```
+
+Then:
+
+$$
+step=0.1(10)=1
+$$
+
+Parameter update:
+
+$$
+\theta_{new}=\theta_{old}-1
+$$
+
+---
+
+# 🚨 LEARNING RATE TOO LARGE
+
+Imagine:
+
+```text
+       \       /
+        \     /
+         \   /
+          \ /
+```
+
+A huge learning rate may cause the model to jump across the minimum.
+
+```text
+      ●
+       \      ●
+        \   /
+         \ /
+        ●
+```
+
+It may:
+
+* oscillate
+* diverge
+* fail to converge
+
+---
+
+# 🚨 LEARNING RATE TOO SMALL
+
+```text
+       \       /
+        \     /
+         \   /
+          \●
+```
+
+The model moves extremely slowly.
+
+Training can take a very long time.
+
+---
+
+# 🎯 GOOD LEARNING RATE
+
+```text
+        \     /
+         \   /
+          \●
+           \
+            \
+```
+
+It gradually approaches the minimum.
+
+---
+
+# 1️⃣2️⃣ LOSS FUNCTION
+
+A loss function measures:
+
+> **How wrong the model is.**
+
+For a simple regression model:
+
+$$
+\hat y=wx+b
+$$
+
+we might use Mean Squared Error:
+
+$$
+MSE=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i-\hat y_i)^2
+$$
+
+Where:
+
+```text
+y   = actual value
+ŷ   = predicted value
+n   = number of samples
+```
+
+---
+
+# 🧠 WHY SQUARE THE ERROR?
+
+Suppose:
+
+```text
+Actual = 100
+Prediction = 90
+```
+
+Error:
+
+$$
+100-90=10
+$$
+
+If prediction is:
+
+```text
+110
+```
+
+error:
+
+$$
+100-110=-10
+$$
+
+If we simply averaged errors:
+
+```text
+10 + (-10) = 0
+```
+
+It could falsely look like zero error.
+
+Squaring:
+
+$$
+10^2=100
+$$
+
+$$
+(-10)^2=100
+$$
+
+makes both errors positive.
+
+---
+
+# 1️⃣3️⃣ A COMPLETE MINI ML PROBLEM
+
+Suppose:
+
+```text
+Hours studied → Exam score
+```
+
+Data:
+
+```text
+Hours: [1, 2, 3, 4]
+Score: [2, 4, 6, 8]
+```
+
+We want to learn:
+
+$$
+y=wx
+$$
+
+Obviously:
+
+```text
+w = 2
+```
+
+But pretend the model doesn't know that.
+
+Start with:
+
+```text
+w = 0
+```
+
+Prediction:
+
+```text
+0
+```
+
+But actual values are:
+
+```text
+2,4,6,8
+```
+
+Large loss.
+
+Gradient descent should gradually change:
+
+```text
+w
+```
+
+until it approaches:
+
+```text
+2
+```
+
+---
+
+# 1️⃣4️⃣ GRADIENT DESCENT FROM SCRATCH 🔥
+
+Let's implement it.
+
+```python
+import numpy as np
+
+x = np.array([1, 2, 3, 4])
+y = np.array([2, 4, 6, 8])
+
+w = 0.0
+learning_rate = 0.01
+
+for epoch in range(1000):
+
+    predictions = w * x
+
+    error = predictions - y
+
+    loss = np.mean(error ** 2)
+
+    gradient = np.mean(2 * x * error)
+
+    w = w - learning_rate * gradient
+
+print("Learned weight:", w)
+print("Loss:", loss)
+```
+
+You should get a value close to:
+
+```text
+2
+```
+
+🎯 The model **learned the relationship from data**.
+
+We didn't tell it:
+
+```text
+w = 2
+```
+
+We allowed optimization to discover it.
+
+---
+
+# 1️⃣5️⃣ UNDERSTANDING THE CODE
+
+### Step 1
+
+```python
+predictions = w * x
+```
+
+Model makes predictions.
+
+---
+
+### Step 2
+
+```python
+error = predictions - y
+```
+
+Calculate prediction error.
+
+---
+
+### Step 3
+
+```python
+loss = np.mean(error ** 2)
+```
+
+Calculate MSE.
+
+---
+
+### Step 4
+
+```python
+gradient = np.mean(2 * x * error)
+```
+
+Calculate how the loss changes with respect to `w`.
+
+---
+
+### Step 5
+
+```python
+w = w - learning_rate * gradient
+```
+
+Update the model.
+
+This is the heart of learning.
+
+---
+
+# 1️⃣6️⃣ VISUALIZE THE TRAINING LOOP
+
+```text
+        Training Data
+              ↓
+        Model parameters
+              ↓
+          Prediction
+              ↓
+          Calculate Loss
+              ↓
+          Calculate Gradient
+              ↓
+       Update Parameters
+              ↓
+       Lower Loss?
+          ↙       ↘
+        Yes        No
+         ↓          ↓
+      Continue    Adjust
+         │
+         └──────────→
+```
+
+This happens many times.
+
+An iteration over the training process is commonly called an **epoch** when the training data is processed once.
+
+---
+
+# 1️⃣7️⃣ CHAIN RULE ⭐⭐⭐⭐⭐
+
+The chain rule is crucial for neural networks.
+
+Suppose:
+
+$$
+y=(2x+1)^2
+$$
+
+This has two functions:
+
+```text
+x
+ ↓
+2x + 1
+ ↓
+square
+ ↓
+y
+```
+
+The chain rule says:
+
+$$
+\frac{dy}{dx}
+=
+\frac{dy}{du}
+\frac{du}{dx}
+$$
+
+Let:
+
+$$
+u=2x+1
+$$
+
+Then:
+
+$$
+y=u^2
+$$
+
+So:
+
+$$
+\frac{dy}{du}=2u
+$$
+
+and:
+
+$$
+\frac{du}{dx}=2
+$$
+
+Therefore:
+
+$$
+\frac{dy}{dx}
+=
+2u\times2
+$$
+
+$$
+=4(2x+1)
+$$
+
+---
+
+# 🧠 WHY DOES THIS MATTER FOR DEEP LEARNING?
+
+A neural network is essentially:
+
+```text
+Input
+ ↓
+Layer 1
+ ↓
+Activation
+ ↓
+Layer 2
+ ↓
+Activation
+ ↓
+Layer 3
+ ↓
+Output
+ ↓
+Loss
+```
+
+The effect of an early weight on the final loss passes through many operations.
+
+The **chain rule** allows us to calculate those gradients.
+
+This is the foundation of:
+
+# Backpropagation
+
+---
+
+# 1️⃣8️⃣ BACKPROPAGATION
+
+Conceptually:
+
+```text
+Forward Pass
+─────────────────────→
+
+Input → Layer → Layer → Prediction
+                         ↓
+                        Loss
+
+←───────────────────────
+     Backward Pass
+     Gradients
+```
+
+Forward:
+
+```text
+Calculate prediction
+```
+
+Backward:
+
+```text
+Calculate gradients
+```
+
+Then:
+
+```text
+Update weights
+```
+
+So:
+
+```text
+Forward propagation
+        ↓
+Loss
+        ↓
+Backpropagation
+        ↓
+Gradients
+        ↓
+Gradient descent
+        ↓
+Updated weights
+```
+
+🔥 This is the foundation of neural-network training.
+
+---
+
+# 1️⃣9️⃣ LOCAL MINIMUM
+
+Imagine the loss surface:
+
+```text
+Loss
+ ↑
+ │      \       /
+ │       \     /
+ │        \___/
+ │
+ └────────────────→ parameter
+```
+
+The lowest point is a minimum.
+
+For simple convex problems, gradient descent can converge toward the global minimum.
+
+But deep neural networks have much more complicated loss landscapes:
+
+```text
+      __      _
+ ___ /  \____/ \__
+    \            /
+     \__      __/
+        \____/
+```
+
+There can be:
+
+* local minima
+* saddle points
+* flat regions
+
+This is one reason optimization becomes more complicated in deep learning.
+
+---
+
+# 2️⃣0️⃣ GRADIENT DESCENT VARIANTS
+
+You'll encounter three major types.
+
+### Batch Gradient Descent
+
+Uses the entire dataset for each update.
+
+```text
+All training data
+      ↓
+Gradient
+      ↓
+Update
+```
+
+Stable but potentially expensive.
+
+---
+
+### Stochastic Gradient Descent
+
+Uses one sample at a time.
+
+```text
+One sample
+    ↓
+Gradient
+    ↓
+Update
+```
+
+Faster updates but noisier.
+
+---
+
+### Mini-Batch Gradient Descent ⭐
+
+Uses a small batch.
+
+Example:
+
+```text
+Dataset = 10,000 samples
+
+Batch = 32
+```
+
+```text
+32 samples
+   ↓
+Gradient
+   ↓
+Update
+```
+
+Modern deep-learning training commonly uses mini-batches.
+
+---
+
+# 2️⃣1️⃣ REAL-WORLD EXAMPLE
+
+Imagine you're training a house-price model.
+
+Parameters:
+
+```text
+w1 → area importance
+w2 → bedroom importance
+w3 → location importance
+w4 → age importance
+```
+
+Initially:
+
+```text
+Random weights
+```
+
+Then:
+
+```text
+Prediction
+     ↓
+Compare with actual price
+     ↓
+Loss
+     ↓
+Gradient
+     ↓
+Adjust w1,w2,w3,w4
+     ↓
+Predict again
+```
+
+After many iterations:
+
+```text
+Loss ↓↓↓
+```
+
+The model has learned parameters that fit the training data better.
+
+---
+
+# 2️⃣2️⃣ FROM-SCRATCH GRADIENT DESCENT
+
+Let's make an even simpler optimizer.
+
+We want to minimize:
+
+$$
+f(x)=x^2
+$$
+
+Derivative:
+
+$$
+f'(x)=2x
+$$
+
+Start:
+
+```text
+x = 10
+```
+
+```python
+x = 10.0
+learning_rate = 0.1
+
+for i in range(20):
+    gradient = 2 * x
+    x = x - learning_rate * gradient
+
+    print(x)
+```
+
+You'll see the value move toward:
+
+```text
+0
+```
+
+Because:
+
+$$
+x^2
+$$
+
+has its minimum at:
+
+$$
+x=0
+$$
+
+---
+
+# 2️⃣3️⃣ THIS IS THE SAME IDEA AS ML
+
+Our simple function:
+
+$$
+x^2
+$$
+
+has:
+
+```text
+parameter → x
+loss → x²
+gradient → 2x
+```
+
+A real model has:
+
+```text
+parameters → w1,w2,w3...
+loss → L
+gradient → ∂L/∂w1, ∂L/∂w2...
+```
+
+The mathematical idea is the same.
+
+---
+
+# 2️⃣4️⃣ COMMON MISTAKES 🚨
+
+### ❌ Mistake 1
+
+Thinking gradient means loss.
+
+No.
+
+```text
+Loss → how wrong
+Gradient → how loss changes
+```
+
+---
+
+### ❌ Mistake 2
+
+Thinking gradient descent follows the gradient.
+
+It follows the **negative gradient**.
+
+```text
+Gradient
+   ↓
+Steepest increase
+
+Negative gradient
+   ↓
+Steepest decrease
+```
+
+---
+
+### ❌ Mistake 3
+
+Thinking learning rate should always be large.
+
+No.
+
+It must be appropriate for the optimization problem.
+
+---
+
+### ❌ Mistake 4
+
+Thinking one update is enough.
+
+Training normally requires repeated updates.
+
+```text
+Update
+Update
+Update
+Update
+...
+```
+
+---
+
+# 2️⃣5️⃣ 🎯 INTERVIEW QUESTIONS
+
+### Q1. What is a derivative?
+
+> A derivative measures how rapidly a function changes with respect to its input. In optimization, it provides the local slope needed to determine how parameters should change.
+
+---
+
+### Q2. What is a gradient?
+
+> A gradient is a vector containing the partial derivatives of a function with respect to its parameters. It points in the direction of greatest local increase.
+
+---
+
+### Q3. Why does gradient descent subtract the gradient?
+
+> The gradient points toward the direction of greatest increase in the loss. Since we want to minimize loss, we move in the opposite direction.
+
+---
+
+### Q4. What is the learning rate?
+
+> The learning rate controls the size of each parameter update during optimization.
+
+---
+
+### Q5. What is backpropagation?
+
+> Backpropagation uses the chain rule to efficiently calculate how the loss changes with respect to neural-network parameters by propagating gradients backward through the network.
+
+---
+
+### Q6. Gradient descent vs backpropagation?
+
+This distinction is important:
+
+```text
+Backpropagation
+      ↓
+Calculates gradients
+
+Gradient Descent
+      ↓
+Uses gradients to update parameters
+```
+
+They are **not the same thing**.
+
+---
+
+# 🧪 DAY 9 PRACTICAL LAB
+
+## Challenge 1 — Function
+
+Implement:
+
+$$
+f(x)=x^2+5x+6
+$$
+
+Calculate:
+
+1. `f(2)`
+2. Derivative
+3. Gradient at `x = 2`
+
+---
+
+## Challenge 2 — Gradient Descent
+
+Minimize:
+
+$$
+f(x)=x^2
+$$
+
+Start:
+
+```text
+x = 10
+```
+
+Use:
+
+```text
+learning_rate = 0.1
+```
+
+Run 20 iterations.
+
+Print:
+
+```text
+iteration
+x
+loss
+gradient
+```
+
+You should see:
+
+```text
+x → 0
+loss → 0
+```
+
+---
+
+# 🧪 CHALLENGE 3 — MINI ML MODEL
+
+Modify our earlier regression:
+
+```python
+import numpy as np
+
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([3, 6, 9, 12, 15])
+```
+
+Model:
+
+$$
+y=wx
+$$
+
+Start:
+
+```python
+w = 0
+```
+
+Train using gradient descent.
+
+### Goal:
+
+Get:
+
+```text
+w ≈ 3
+```
+
+Then change the dataset to:
+
+```text
+x = [1,2,3,4,5]
+y = [5,10,15,20,25]
+```
+
+and see whether:
+
+```text
+w ≈ 5
+```
+
+---
+
+# 🧠 DAY 9 MASTER MINDMAP
+
+```text
+                    CALCULUS FOR ML
+                          │
+             ┌────────────┼────────────┐
+             ↓            ↓            ↓
+          Function     Derivative   Partial
+                                      Derivative
+             │            │            │
+             │            ↓            │
+             │          Slope          │
+             │            │            │
+             └────────────┼────────────┘
+                          ↓
+                       Gradient
+                          │
+                          ↓
+                    Loss Function
+                          │
+                          ↓
+                   Optimization
+                          │
+                          ↓
+                  Gradient Descent
+                          │
+                 ┌────────┴────────┐
+                 ↓                 ↓
+          Learning Rate        Gradient
+                 │                 │
+                 └────────┬────────┘
+                          ↓
+                  Update Parameters
+                          │
+                          ↓
+                    Lower Loss
+                          │
+                          ↓
+                  Neural Networks
+                          │
+                          ↓
+                    Backpropagation
+                          │
+                          ↓
+                      Chain Rule
+```
+
+---
+
+# 📚 AI/ML TOPIC TRACKER
+
+| Day   | Topic                                                                         |
+| ----- | ----------------------------------------------------------------------------- |
+| 1     | AI/ML Roadmap + Methodology ✅                                                 |
+| 2     | NumPy Fundamentals ✅                                                          |
+| 3     | Pandas + Data Cleaning + EDA ✅                                                |
+| 4     | Visualization + Statistical EDA ✅                                             |
+| 5     | Statistics + Probability + Bias–Variance ✅                                    |
+| 6     | Conditional Probability + Bayes + Correlation + Sampling ✅                    |
+| 7     | Linear Algebra: Vectors, Matrices, Dot Product, Matrix Multiplication ✅       |
+| 8     | Eigenvalues, Eigenvectors + PCA + Dimensionality Reduction ✅                  |
+| **9** | **Calculus: Derivatives + Gradients + Gradient Descent + Backpropagation 🔥** |
+
+### 🔜 DAY 10
+
+**Optimization & Machine Learning Foundations — Loss Functions in depth, MSE, MAE, Log Loss, convexity, gradient descent variants, regularization, learning-rate schedules, and building a complete linear-regression model from scratch.**
+
+Today's key equation to remember:
+
+$$
+\boxed{\theta_{new}=\theta_{old}-\alpha\nabla L(\theta)}
+$$
+
+If you understand **why this equation works**, you're beginning to understand how ML models actually learn—not just how to call `model.fit()`.
