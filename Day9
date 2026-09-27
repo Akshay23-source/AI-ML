@@ -1,0 +1,1435 @@
+# 🚀 AI/ML ENGINEER — DAY 10/120
+
+## Optimization & Machine Learning Foundations
+
+### Loss Functions • MSE • MAE • Log Loss • Gradient Descent • Regularization
+
+🔥 **Day 10 = the day we connect mathematics to actual model training.**
+
+So far you've learned:
+
+```text
+Day 1 → AI/ML roadmap
+Day 2 → NumPy
+Day 3 → Pandas
+Day 4 → EDA + Visualization
+Day 5 → Statistics
+Day 6 → Probability
+Day 7 → Linear Algebra
+Day 8 → PCA
+Day 9 → Calculus + Gradients
+```
+
+Today:
+
+> **How does an ML model measure whether it is wrong, and how does optimization make it better?**
+
+---
+
+# 🎯 TODAY'S TARGET
+
+By the end of today, you should understand:
+
+* What a loss function is
+* Loss vs cost vs objective
+* MSE
+* MAE
+* RMSE
+* Log Loss / Cross-Entropy
+* Why different problems use different losses
+* Gradient descent in practice
+* Batch vs SGD vs Mini-batch
+* Learning-rate problems
+* Regularization
+* L1 vs L2
+* Building Linear Regression from scratch
+* Comparing your implementation with scikit-learn
+
+---
+
+# 1️⃣ THE ML TRAINING LOOP
+
+Every supervised ML model follows a basic idea:
+
+```text
+              Training Data
+                   ↓
+              Model
+                   ↓
+              Prediction
+                   ↓
+          ┌─────────────────┐
+          │  Loss Function  │
+          └────────┬────────┘
+                   ↓
+                Loss
+                   ↓
+               Gradient
+                   ↓
+            Update Weights
+                   ↓
+             Repeat Again
+                   ↓
+              Better Model
+```
+
+This is the core learning loop.
+
+---
+
+# 2️⃣ WHAT IS A LOSS FUNCTION?
+
+A loss function answers:
+
+> **"How wrong is my prediction?"**
+
+Suppose:
+
+```text
+Actual price       = ₹50 lakh
+Predicted price    = ₹45 lakh
+```
+
+Error:
+
+```text
+₹5 lakh
+```
+
+The loss function converts this error into a numerical value that the optimizer can minimize.
+
+---
+
+# 3️⃣ LOSS vs COST vs OBJECTIVE
+
+These terms are often confused.
+
+### Loss
+
+Usually refers to error for **one training example**.
+
+$$
+L(y,\hat y)
+$$
+
+### Cost
+
+Often refers to average loss across the dataset.
+
+$$
+J(\theta)=\frac{1}{n}\sum L_i
+$$
+
+### Objective
+
+The function we ultimately optimize.
+
+It may include:
+
+```text
+prediction loss
++
+regularization
+```
+
+Different textbooks and libraries sometimes use these terms differently, so focus on the underlying idea rather than the naming.
+
+---
+
+# 4️⃣ MEAN SQUARED ERROR — MSE ⭐⭐⭐⭐⭐
+
+For regression:
+
+$$
+MSE=
+\frac{1}{n}
+\sum_{i=1}^{n}(y_i-\hat y_i)^2
+$$
+
+Example:
+
+```text
+Actual:     [10, 20, 30]
+Prediction: [12, 18, 33]
+```
+
+Errors:
+
+```text
+10 - 12 = -2
+20 - 18 =  2
+30 - 33 = -3
+```
+
+Squared errors:
+
+```text
+4
+4
+9
+```
+
+MSE:
+
+$$
+\frac{4+4+9}{3}
+=
+\frac{17}{3}
+$$
+
+$$
+\approx5.67
+$$
+
+---
+
+# 🧠 Why square the errors?
+
+Three major reasons:
+
+### 1. Removes negative signs
+
+```text
+-5² = 25
++5² = 25
+```
+
+### 2. Penalizes large errors heavily
+
+Compare:
+
+```text
+error = 2 → 4
+error = 10 → 100
+```
+
+A huge error receives much more penalty.
+
+### 3. Convenient mathematical properties
+
+MSE is differentiable and gives us a convenient gradient for optimization.
+
+---
+
+# 5️⃣ MAE — MEAN ABSOLUTE ERROR
+
+$$
+MAE=
+\frac{1}{n}
+\sum |y_i-\hat y_i|
+$$
+
+Using our previous errors:
+
+```text
+-2, +2, -3
+```
+
+Absolute errors:
+
+```text
+2, 2, 3
+```
+
+MAE:
+
+$$
+\frac{2+2+3}{3}
+=
+2.33
+$$
+
+---
+
+# 🔥 MSE vs MAE
+
+| Property             | MSE        | MAE               |
+| -------------------- | ---------- | ----------------- |
+| Error transformation | Square     | Absolute          |
+| Outlier sensitivity  | High       | Lower             |
+| Units                | Squared    | Original          |
+| Differentiability    | Smooth     | Has a kink at 0   |
+| Common use           | Regression | Robust regression |
+
+---
+
+# 6️⃣ OUTLIER EXPERIMENT
+
+Consider:
+
+```text
+Actual:
+[10, 20, 30]
+
+Prediction:
+[11, 21, 100]
+```
+
+Errors:
+
+```text
+1, 1, 70
+```
+
+MAE:
+
+$$
+\frac{1+1+70}{3}=24
+$$
+
+MSE:
+
+$$
+\frac{1^2+1^2+70^2}{3}
+$$
+
+$$
+=\frac{4902}{3}
+$$
+
+$$
+=1634
+$$
+
+😮
+
+The large error dominates MSE.
+
+That's why:
+
+> **MSE is much more sensitive to outliers than MAE.**
+
+---
+
+# 7️⃣ RMSE
+
+RMSE = Root Mean Squared Error.
+
+$$
+RMSE=\sqrt{MSE}
+$$
+
+Why take the square root?
+
+Because MSE has squared units.
+
+If target is:
+
+```text
+₹
+```
+
+MSE is conceptually:
+
+```text
+₹²
+```
+
+RMSE returns to:
+
+```text
+₹
+```
+
+So if:
+
+$$
+MSE=100
+$$
+
+then:
+
+$$
+RMSE=10
+$$
+
+---
+
+# 8️⃣ PYTHON — REGRESSION METRICS
+
+```python
+import numpy as np
+
+actual = np.array([10, 20, 30])
+predicted = np.array([12, 18, 33])
+
+mse = np.mean((actual - predicted) ** 2)
+mae = np.mean(np.abs(actual - predicted))
+rmse = np.sqrt(mse)
+
+print("MSE:", mse)
+print("MAE:", mae)
+print("RMSE:", rmse)
+```
+
+---
+
+# 9️⃣ WHEN SHOULD WE USE WHICH?
+
+### MSE
+
+Useful when:
+
+* large errors should be strongly penalized
+* smooth optimization is useful
+* ordinary regression is being used
+
+### MAE
+
+Useful when:
+
+* outliers are present
+* you want a more robust error measure
+* error magnitude in original units is important
+
+### RMSE
+
+Useful when:
+
+* you want error in original units
+* large errors should matter more
+
+---
+
+# 🔟 CLASSIFICATION NEEDS A DIFFERENT LOSS
+
+Suppose:
+
+```text
+Actual:
+Spam = 1
+```
+
+Model predicts:
+
+```text
+P(Spam) = 0.9
+```
+
+Good prediction.
+
+But:
+
+```text
+P(Spam) = 0.1
+```
+
+is a very bad prediction.
+
+MSE isn't the standard choice for probabilistic classification.
+
+We commonly use:
+
+# Binary Cross-Entropy / Log Loss
+
+$$
+L=
+-[y\log(p)+(1-y)\log(1-p)]
+$$
+
+where:
+
+```text
+y = actual class
+p = predicted probability
+```
+
+---
+
+# 1️⃣1️⃣ WHY LOG LOSS IS POWERFUL
+
+Suppose actual:
+
+```text
+y = 1
+```
+
+### Model A
+
+```text
+p = 0.9
+```
+
+Loss:
+
+$$
+-\log(0.9)
+$$
+
+Small.
+
+---
+
+### Model B
+
+```text
+p = 0.1
+```
+
+Loss:
+
+$$
+-\log(0.1)
+$$
+
+Much larger.
+
+So log loss heavily penalizes a model that is **confident and wrong**.
+
+That's an important idea.
+
+---
+
+# 1️⃣2️⃣ PYTHON LOG LOSS
+
+```python
+import numpy as np
+
+y = 1
+p = 0.9
+
+loss = -(y * np.log(p) + (1-y) * np.log(1-p))
+
+print(loss)
+```
+
+For `y = 1`, this simplifies to:
+
+$$
+-\log(p)
+$$
+
+---
+
+# 1️⃣3️⃣ MULTI-CLASS CLASSIFICATION
+
+Suppose a model predicts:
+
+```text
+Cat       0.70
+Dog       0.20
+Horse     0.10
+```
+
+Actual class:
+
+```text
+Cat
+```
+
+The model gets a high probability on the correct class.
+
+Cross-entropy rewards this.
+
+If instead:
+
+```text
+Cat       0.05
+Dog       0.90
+Horse     0.05
+```
+
+the model is confidently wrong.
+
+Loss becomes high.
+
+This is the foundation of the **softmax + cross-entropy** combination you'll encounter later in neural networks.
+
+---
+
+# 1️⃣4️⃣ GRADIENT DESCENT REVISITED
+
+Yesterday:
+
+$$
+\boxed{
+\theta_{new}
+=
+\theta_{old}
+-
+\alpha\nabla L
+}
+$$
+
+Today we understand what `L` actually represents.
+
+```text
+θ
+↓
+Model
+↓
+Prediction
+↓
+Loss L
+↓
+Gradient ∇L
+↓
+Update θ
+```
+
+---
+
+# 1️⃣5️⃣ A SIMPLE OPTIMIZATION EXAMPLE
+
+Suppose:
+
+$$
+f(w)=w^2
+$$
+
+Derivative:
+
+$$
+\frac{df}{dw}=2w
+$$
+
+Start:
+
+```text
+w = 10
+```
+
+Learning rate:
+
+```text
+α = 0.1
+```
+
+Gradient:
+
+$$
+2(10)=20
+$$
+
+Update:
+
+$$
+w=10-0.1(20)
+$$
+
+$$
+w=8
+$$
+
+Next iteration:
+
+$$
+gradient=16
+$$
+
+$$
+w=8-0.1(16)
+$$
+
+$$
+w=6.4
+$$
+
+Then:
+
+```text
+10
+↓
+8
+↓
+6.4
+↓
+5.12
+↓
+...
+↓
+0
+```
+
+The optimizer is moving toward the minimum.
+
+---
+
+# 1️⃣6️⃣ LEARNING RATE
+
+The learning rate controls the step size.
+
+$$
+\theta_{new}
+=
+\theta-\alpha\nabla L
+$$
+
+### Too small
+
+```text
+Learning rate = 0.000001
+```
+
+Training may become extremely slow.
+
+### Too large
+
+```text
+Learning rate = 10
+```
+
+The model may overshoot the minimum.
+
+```text
+      \       /
+       \     /
+        \   /
+         \ /
+          ●
+
+Huge step:
+   ●             ●
+      \       /
+```
+
+Potential result:
+
+```text
+oscillation
+or
+divergence
+```
+
+---
+
+# 1️⃣7️⃣ BATCH vs STOCHASTIC vs MINI-BATCH
+
+Suppose:
+
+```text
+1,000,000 training examples
+```
+
+### Batch Gradient Descent
+
+Use all:
+
+```text
+1,000,000
+      ↓
+gradient
+      ↓
+update
+```
+
+Advantages:
+
+* stable gradient
+* accurate full-dataset direction
+
+Disadvantage:
+
+* expensive for huge datasets
+
+---
+
+### Stochastic Gradient Descent
+
+One example:
+
+```text
+1 sample
+   ↓
+gradient
+   ↓
+update
+```
+
+Advantages:
+
+* frequent updates
+* can be useful for large/streaming data
+
+Disadvantages:
+
+* noisy updates
+
+---
+
+### Mini-Batch ⭐
+
+Example:
+
+```text
+Batch size = 32
+```
+
+```text
+32 samples
+    ↓
+gradient
+    ↓
+update
+```
+
+This is extremely common in deep learning.
+
+---
+
+# 1️⃣8️⃣ REGULARIZATION ⭐⭐⭐⭐⭐
+
+Now we solve another ML problem:
+
+> What if the model becomes too complicated?
+
+Remember:
+
+```text
+Too simple
+   ↓
+Underfitting
+
+Too complex
+   ↓
+Overfitting
+```
+
+Regularization discourages overly complex parameter values.
+
+The objective becomes approximately:
+
+$$
+Loss + Penalty
+$$
+
+---
+
+# 1️⃣9️⃣ L2 REGULARIZATION
+
+L2 adds:
+
+$$
+\lambda\sum_j w_j^2
+$$
+
+to the objective.
+
+Conceptually:
+
+$$
+J=
+MSE+\lambda\sum_jw_j^2
+$$
+
+Large weights become expensive.
+
+Therefore the model is encouraged to keep weights smaller.
+
+---
+
+# 2️⃣0️⃣ L1 REGULARIZATION
+
+L1 adds:
+
+$$
+\lambda\sum_j|w_j|
+$$
+
+So:
+
+$$
+J=
+MSE+\lambda\sum_j|w_j|
+$$
+
+L1 can drive some weights exactly toward zero.
+
+This can create a sparse model.
+
+---
+
+# 🔥 L1 vs L2
+
+|                         | L1                         | L2                      |   |              |
+| ----------------------- | -------------------------- | ----------------------- | - | ------------ |
+| Penalty                 | (\sum                      | w                       | ) | \(\sum w^2\) |
+| Can produce exact zeros | Often                      | Less commonly           |   |              |
+| Useful for              | Sparsity/feature selection | Stable weight shrinkage |   |              |
+| Common name             | Lasso                      | Ridge                   |   |              |
+
+---
+
+# 2️⃣1️⃣ REGULARIZATION INTUITION
+
+Imagine two models.
+
+### Model A
+
+```text
+w1 = 1
+w2 = 2
+w3 = 1
+```
+
+### Model B
+
+```text
+w1 = 100
+w2 = 200
+w3 = 150
+```
+
+Model B has enormous parameters.
+
+Regularization says:
+
+> "Unless those large weights significantly improve prediction, don't use them."
+
+This can improve generalization.
+
+---
+
+# 2️⃣2️⃣ COMPLETE LINEAR REGRESSION FROM SCRATCH 🔥
+
+Now let's build a tiny ML algorithm.
+
+Dataset:
+
+```python
+import numpy as np
+
+X = np.array([1, 2, 3, 4, 5], dtype=float)
+y = np.array([3, 6, 9, 12, 15], dtype=float)
+```
+
+Model:
+
+$$
+\hat y=wx
+$$
+
+Start:
+
+```python
+w = 0.0
+```
+
+Training:
+
+```python
+w = 0.0
+learning_rate = 0.01
+
+for epoch in range(1000):
+
+    predictions = w * X
+
+    errors = predictions - y
+
+    loss = np.mean(errors ** 2)
+
+    gradient = np.mean(2 * X * errors)
+
+    w = w - learning_rate * gradient
+
+print("Weight:", w)
+print("Loss:", loss)
+```
+
+Expected:
+
+```text
+Weight ≈ 3
+Loss ≈ 0
+```
+
+🎯 The model discovered the relationship.
+
+---
+
+# 2️⃣3️⃣ ADDING A BIAS
+
+Now:
+
+$$
+\hat y=wx+b
+$$
+
+Code:
+
+```python
+w = 0.0
+b = 0.0
+
+learning_rate = 0.01
+
+for epoch in range(1000):
+
+    predictions = w * X + b
+
+    errors = predictions - y
+
+    loss = np.mean(errors ** 2)
+
+    dw = np.mean(2 * X * errors)
+    db = np.mean(2 * errors)
+
+    w = w - learning_rate * dw
+    b = b - learning_rate * db
+
+print("w:", w)
+print("b:", b)
+print("loss:", loss)
+```
+
+Now you've implemented a basic **linear regression optimizer** yourself.
+
+---
+
+# 2️⃣4️⃣ THE COMPLETE TRAINING EQUATION
+
+For:
+
+$$
+\hat y=wx+b
+$$
+
+and:
+
+$$
+MSE=\frac1n\sum(\hat y-y)^2
+$$
+
+we can calculate:
+
+$$
+\frac{\partial MSE}{\partial w}
+=
+\frac{2}{n}
+\sum x_i(\hat y_i-y_i)
+$$
+
+and:
+
+$$
+\frac{\partial MSE}{\partial b}
+=
+\frac{2}{n}
+\sum(\hat y_i-y_i)
+$$
+
+Then:
+
+$$
+w:=w-\alpha\frac{\partial MSE}{\partial w}
+$$
+
+$$
+b:=b-\alpha\frac{\partial MSE}{\partial b}
+$$
+
+This is the mathematics behind our code.
+
+---
+
+# 2️⃣5️⃣ NOW COMPARE WITH SCIKIT-LEARN
+
+After understanding it from scratch:
+
+```python
+from sklearn.linear_model import LinearRegression
+
+X = X.reshape(-1, 1)
+
+model = LinearRegression()
+
+model.fit(X, y)
+
+print("Weight:", model.coef_)
+print("Bias:", model.intercept_)
+```
+
+This is the learning philosophy you've been following:
+
+```text
+CONCEPT
+   ↓
+MATH
+   ↓
+FROM SCRATCH
+   ↓
+LIBRARY
+   ↓
+EXPERIMENT
+```
+
+🔥 This is exactly how you should learn ML rather than simply memorizing `model.fit()`.
+
+---
+
+# 2️⃣6️⃣ LOSS LANDSCAPE
+
+Imagine:
+
+```text
+Loss
+ ↑
+ │
+ │\               /
+ │ \             /
+ │  \           /
+ │   \_________/
+ │        ●
+ └────────────────→ Weight
+```
+
+The goal is:
+
+```text
+Find the minimum
+```
+
+Gradient descent repeatedly asks:
+
+> "Which direction reduces the loss?"
+
+Then takes a step.
+
+---
+
+# 2️⃣7️⃣ WHY CONVEXITY MATTERS
+
+A simple convex function looks like:
+
+```text
+      \     /
+       \   /
+        \_/
+```
+
+There is one global minimum.
+
+For convex optimization:
+
+```text
+Local minimum = Global minimum
+```
+
+Linear regression with standard MSE has a convex objective under the usual formulation.
+
+Deep neural networks, however, generally have much more complicated non-convex optimization landscapes.
+
+---
+
+# 2️⃣8️⃣ REAL-WORLD APPLICATION
+
+Imagine you're building a **house-price predictor**.
+
+Features:
+
+```text
+Area
+Bedrooms
+Location score
+Age
+Parking
+```
+
+Model:
+
+$$
+\hat y=XW+b
+$$
+
+Initially:
+
+```text
+Random weights
+```
+
+Then:
+
+```text
+Prediction
+    ↓
+MSE
+    ↓
+Gradient
+    ↓
+Update W,b
+    ↓
+Prediction
+    ↓
+MSE decreases
+```
+
+Eventually:
+
+```text
+Training
+   ↓
+Loss ↓
+   ↓
+Better predictions
+```
+
+But then you must check:
+
+```text
+Validation/Test performance
+```
+
+because:
+
+> **Low training loss alone does not guarantee good generalization.**
+
+---
+
+# 2️⃣9️⃣ 🚨 COMMON INTERVIEW TRAPS
+
+### ❌ "Loss and accuracy are the same."
+
+No.
+
+Loss measures an optimization objective.
+
+Accuracy measures classification correctness.
+
+---
+
+### ❌ "Lower training loss always means a better model."
+
+No.
+
+A model can overfit.
+
+```text
+Training loss ↓
+Validation loss ↑
+```
+
+---
+
+### ❌ "L1 and L2 are the same."
+
+No.
+
+```text
+L1 → absolute weights
+L2 → squared weights
+```
+
+---
+
+### ❌ "Backpropagation updates weights."
+
+More precisely:
+
+> Backpropagation computes gradients; an optimizer such as gradient descent uses those gradients to update weights.
+
+---
+
+# 🎯 3️⃣0️⃣ INTERVIEW QUESTIONS
+
+### Q1. What is a loss function?
+
+> A loss function quantifies the difference between a model's prediction and the actual target and provides an objective that can be minimized during training.
+
+### Q2. MSE vs MAE?
+
+> MSE squares errors and therefore penalizes large errors more strongly, while MAE uses absolute errors and is generally less sensitive to outliers.
+
+### Q3. Why use cross-entropy for classification?
+
+> Cross-entropy measures the difference between the true class distribution and predicted probabilities and strongly penalizes confident incorrect predictions.
+
+### Q4. What is regularization?
+
+> Regularization adds a penalty for model complexity, usually by penalizing large parameter values, to reduce overfitting and improve generalization.
+
+### Q5. L1 vs L2?
+
+> L1 adds the sum of absolute parameter values and can produce sparse models, while L2 adds the sum of squared parameter values and generally shrinks weights smoothly toward zero.
+
+### Q6. What is the role of learning rate?
+
+> It controls the magnitude of parameter updates during optimization.
+
+---
+
+# 🧪 DAY 10 PRACTICAL LAB
+
+## Challenge 1 — Metrics
+
+Use:
+
+```python
+actual = np.array([10, 20, 30, 40, 50])
+predicted = np.array([12, 19, 28, 45, 48])
+```
+
+Calculate manually and with NumPy:
+
+```text
+MSE
+MAE
+RMSE
+```
+
+---
+
+## Challenge 2 — Gradient Descent
+
+Minimize:
+
+$$
+f(x)=x^2
+$$
+
+Start:
+
+```text
+x = 20
+learning_rate = 0.1
+```
+
+Print every iteration:
+
+```text
+Iteration
+x
+Gradient
+Loss
+```
+
+Watch:
+
+```text
+x ↓
+Loss ↓
+```
+
+---
+
+# 🔥 CHALLENGE 3 — BUILD YOUR OWN LINEAR REGRESSION
+
+Use:
+
+```python
+X = np.array([1, 2, 3, 4, 5], dtype=float)
+
+y = np.array([4, 7, 10, 13, 16], dtype=float)
+```
+
+The underlying relationship is:
+
+$$
+y=3x+1
+$$
+
+But **do not hard-code `3` and `1`.**
+
+Your gradient-descent algorithm must learn them.
+
+Your final result should approach:
+
+```text
+w ≈ 3
+b ≈ 1
+```
+
+Then use your learned model to predict:
+
+```text
+x = 10
+```
+
+Expected prediction should be close to:
+
+```text
+31
+```
+
+---
+
+# 🧠 DAY 10 MASTER MINDMAP
+
+```text
+                 OPTIMIZATION
+                      │
+                      ↓
+                 MODEL
+                      │
+                      ↓
+                 PREDICTION
+                      │
+                      ↓
+                LOSS FUNCTION
+                      │
+        ┌─────────────┼─────────────┐
+        ↓             ↓             ↓
+       MSE            MAE       Cross-Entropy
+        │             │             │
+   Regression    Robust Error   Classification
+        │
+        ↓
+      Gradient
+        │
+        ↓
+ Gradient Descent
+        │
+   ┌────┼────┐
+   ↓    ↓    ↓
+Batch  SGD  Mini-Batch
+        │
+        ↓
+Learning Rate
+        │
+        ↓
+Parameter Updates
+        │
+        ↓
+Lower Training Loss
+        │
+        ↓
+Generalization
+        │
+        ↓
+Regularization
+      │     │
+      ↓     ↓
+     L1     L2
+   Lasso   Ridge
+```
+
+---
+
+# 📚 AI/ML TOPIC TRACKER
+
+| Day    | Topic                                                                                  |
+| ------ | -------------------------------------------------------------------------------------- |
+| 1      | AI/ML Roadmap + Methodology ✅                                                          |
+| 2      | NumPy Fundamentals ✅                                                                   |
+| 3      | Pandas + Data Cleaning + EDA ✅                                                         |
+| 4      | Data Visualization + Statistical EDA ✅                                                 |
+| 5      | Statistics + Probability + Bias–Variance ✅                                             |
+| 6      | Conditional Probability + Bayes + Correlation + Sampling ✅                             |
+| 7      | Linear Algebra: Vectors, Matrices, Dot Product, Matrix Multiplication ✅                |
+| 8      | Eigenvalues + Eigenvectors + PCA + Dimensionality Reduction ✅                          |
+| 9      | Calculus + Derivatives + Gradients + Gradient Descent + Backpropagation ✅              |
+| **10** | **Optimization + Loss Functions + Regularization + Linear Regression From Scratch 🔥** |
+
+---
+
+# 🚀 NEXT: DAY 11
+
+**Machine Learning Foundations — What exactly is Machine Learning? Supervised vs Unsupervised vs Semi-Supervised vs Reinforcement Learning, regression vs classification, training/validation/test sets, feature/target concepts, data leakage, and the complete ML workflow.**
+
+Today's most important mental model:
+
+$$
+\boxed{
+\text{Prediction}
+\rightarrow
+\text{Loss}
+\rightarrow
+\text{Gradient}
+\rightarrow
+\text{Update}
+\rightarrow
+\text{Better Prediction}
+}
+$$
+
+That's the fundamental learning loop behind the ML models you'll build next.
