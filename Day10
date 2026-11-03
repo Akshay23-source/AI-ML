@@ -1,0 +1,685 @@
+# 🚀 AI/ML ENGINEER — DAY 11/120
+
+## Machine Learning Foundations
+
+### What is ML? • Learning Paradigms • Regression • Classification • Dataset Splitting • ML Workflow
+
+Day 11 — New learning module
+
+Welcome back! 🔥
+
+You've completed the mathematical foundations of Machine Learning:
+
+- Python, NumPy and Pandas
+- Statistics and Probability
+- Linear Algebra and PCA
+- Calculus and Gradient Descent
+- Loss Functions and Optimization
+
+Today, we move from mathematics to actual Machine Learning concepts and engineering workflows.
+
+The big question:
+
+> How does a computer learn patterns from data and use those patterns to make predictions on information it has never seen?
+
+# 1. Executive Summary — What is Machine Learning?
+
+Machine Learning is a branch of AI in which computers learn patterns from data to make predictions or decisions without requiring us to manually program every rule.
+
+Consider a spam detector.
+
+Traditional programming:
+
+```
+Programmer writes rules
+       ↓
+Check suspicious words
+       ↓
+Check sender address
+       ↓
+Decide spam or not spam
+```
+
+Machine Learning:
+
+```
+Thousands of labelled emails
+          ↓
+     ML Algorithm
+          ↓
+    Learns patterns
+          ↓
+     Trained Model
+          ↓
+     New Email
+          ↓
+   Spam / Not Spam
+```
+
+The difference is that the ML model learns the decision patterns from examples.
+
+## Three important components
+
+| Component | Meaning                                     |
+| --------- | ------------------------------------------- |
+| Data      | Examples used for learning                  |
+| Algorithm | Method used to learn patterns               |
+| Model     | Learned representation used for predictions |
+
+Remember: An algorithm is the learning procedure; a model is what we obtain after training.
+
+# 2. Four major types of Machine Learning
+
+[Validate User](https://images.openai.com/static-rsc-4/stEnbgTtp9tnZRJXy33BUhyfNpKZvoRdzB1-cBAC3VmE2zaSZsqnJVFcToGciGnNpwBYpxxeCHerF_qwiJk9VUiBQuhfjXNQMyZNEUFF-8S8o3F_5jOiU58VdKpb2WCbIIFAohLfJMJXiyYhWmKqjH4TTz3ZMjXy_4ylDAq7vsA?purpose=inline)
+
+1\. Supervised Learning
+
+Learns from labelled examples.
+
+Example: House features + actual house prices → predict a new house price.
+
+Applications: spam detection, fraud detection, price prediction.
+
+[How to Choose the Right Number of Clusters in the K-Means Algorithm? | by Manik Soni | The Startup | Medium](https://images.openai.com/static-rsc-4/MYvUypLw42YjlvZPm90p-YvFvTB-_LXEP_mQLNClLeRI436V6anTe01fBo67b8G-PSYBEmkycC8sZA_48IOXe-xXyFStjtdHGecW1-3Ns6niTpsQW9nPkGCiYQQDPsa66Mu97H0CVSB_QOfd3cFkf58PjT3RNuTNu_zZMIpATiQ?purpose=inline)
+
+2\. Unsupervised Learning
+
+Learns structure from data without supplied target labels.
+
+Example: Group customers based on purchasing behavior.
+
+Applications: customer segmentation, anomaly exploration, dimensionality reduction.
+
+[Fig. 13.2, \[Supervised learning methods use labeled...\]. - Social and Affective Neuroscience of Everyday Human Interaction - NCBI Bookshelf](https://images.openai.com/static-rsc-4/quOFc_58LpuKiwYaR3X3ipN1d_HAO4k7Jim5w9IBrG8Ez2H2ABGJG1QovL7ePQFxizRTsPVTZOVer0aVE45Pb3CgHTRwkzLUnc2bNRZTNGWd0c01E9mvHHmm2-yPnngKgjvgw_WbX0sKnhQAHe_UvhYQ_ltd6lBPWEabeYDmy18?purpose=inline)
+
+3\. Semi-Supervised Learning
+
+Uses a small labelled dataset together with a larger unlabelled dataset.
+
+Example: A few labelled medical images and thousands of unlabelled images.
+
+[AI and ML](https://images.openai.com/static-rsc-4/FjMzDxLY3XXaAdKNkISmWIIbGZ0pLSx085_HjBvIoGPyqNT1bPvWcz7xKXIq2Ou8Y79Hk4imM6wKQumNfENHZAFvoew6E5X5Mk-l8AWO-Cd4tZCTxOTlh7Ip7ZTPOf4E51Ue5fyqZucNQMhXsJlxLYFVga6PtTcFAGHDGL_gc6c?purpose=inline)
+
+4\. Reinforcement Learning
+
+An agent learns by interacting with an environment and receiving rewards or penalties.
+
+Example: A robot learning to navigate a room.
+
+## Comparison
+
+| Type            | Training signal                       | Example              |
+| --------------- | ------------------------------------- | -------------------- |
+| Supervised      | Labels                                | Predict salary       |
+| Unsupervised    | No supplied labels                    | Customer clustering  |
+| Semi-supervised | Few labels + many unlabelled examples | Image classification |
+| Reinforcement   | Rewards                               | Game-playing agent   |
+
+### Industry connection
+
+- Banking: fraud classification
+- E-commerce: customer clustering
+- Healthcare: medical image analysis
+- Robotics: navigation
+- Autonomous systems: decision-making
+
+# 3. Supervised Learning — Regression vs Classification
+
+These are two of the most important supervised-learning tasks.
+
+## A. Regression
+
+Regression predicts a numerical quantity.
+
+Examples:
+
+```
+House price       → ₹75,00,000
+Temperature       → 32.5°C
+Salary            → ₹8,50,000
+Delivery time     → 42 minutes
+```
+
+Mathematical representation:
+
+\\[ \hat y=f(X) \\]
+
+Where:
+
+- \\(X\\): input features
+- \\(\hat y\\): predicted numerical output
+
+[Univariate Linear Regression: How Machines Learn to Predict with a Line | by MXCode | Medium](https://images.openai.com/static-rsc-4/EiWylDGE2tIzmDWJNyKCxZR7IXU9yr_cdmLQo9Sz3L8L3hHhpPof3Anee9dWLu0rcgEpXb_TFqkZrecJbR-L529W_IXfF_ZDe1mGE4PbC1Xnt51x05yj77aMjUXLZSF6rPgP9buYfcOjfrO5lUqVisoOomEghjLLnz7hdwjwTk4?purpose=inline)
+
+[medium.com](https://medium.com/%40mxcode/univariate-linear-regression-how-machines-learn-to-predict-with-a-line-40d834c871b0?utm_source=chatgpt.com)
+
+Algorithms:
+
+- Linear Regression
+- Polynomial Regression
+- Decision Tree Regressor
+- Random Forest Regressor
+- Gradient Boosting Regressor
+
+## B. Classification
+
+Classification predicts a category or class.
+
+Examples:
+
+```
+Email       → Spam / Not Spam
+Transaction → Fraud / Genuine
+Image       → Cat / Dog
+Customer    → Churn / No Churn
+```
+
+[Plotting the decision boundary of a logistic regression model](https://images.openai.com/static-rsc-4/gZBvn2zWkIpg55qzB2xO_0aJxMqp9gnmlkykp3RMw8bYX1WJ_oWuA4Arz_WEHeVMpUzG_xT6yn9sLmRJMed7adzE8oE8ykHodCXhmI-VjTYTqHQMZB2l9F4LU4oGEjr6uR5NYnECGuoK1USgw-tj4Ccr36nf57NleYGTUVX7Zug?purpose=inline)
+
+[scipython.com](https://scipython.com/blog/plotting-the-decision-boundary-of-a-logistic-regression-model/?utm_source=chatgpt.com)
+
+Algorithms:
+
+- Logistic Regression
+- K-Nearest Neighbors
+- Decision Tree Classifier
+- Random Forest Classifier
+- Support Vector Machine
+- Naive Bayes
+
+### Important distinction
+
+Logistic Regression is called regression, but it is commonly used for classification because it estimates class probabilities.
+
+# 4. Features and Target Variables
+
+This is fundamental to every ML project.
+
+Suppose we want to predict student marks.
+
+| Study hours | Attendance | Projects | Marks |
+| ----------- | ---------- | -------- | ----- |
+| 2           | 70         | 1        | 45    |
+| 4           | 80         | 2        | 60    |
+| 6           | 85         | 3        | 75    |
+| 8           | 95         | 4        | 90    |
+
+Features:
+
+```
+X = [    [2, 70, 1],    [4, 80, 2],    [6, 85, 3],    [8, 95, 4]]
+```
+
+Target:
+
+```
+y = [45, 60, 75, 90]
+```
+
+- Features (`X`): information provided to the model.
+- Target (`y`): value the model should learn to predict.
+
+Visual representation
+
+Features (X)
+
+Study hours • Attendance • Projects
+
+Machine Learning Model
+
+Prediction (ŷ)
+
+Predicted marks
+
+Python:
+
+```
+import pandas as pddata = {    "study_hours": [2, 4, 6, 8],    "attendance": [70, 80, 85, 95],    "projects": [1, 2, 3, 4],    "marks": [45, 60, 75, 90]}df = pd.DataFrame(data)X = df.drop("marks", axis=1)y = df["marks"]print(X)print(y)
+```
+
+# 5. The Three Dataset Splits ⭐⭐⭐⭐⭐
+
+This is extremely important in real ML engineering.
+
+Why shouldn't we train and evaluate a model on exactly the same data?
+
+Because a model might memorize the training examples instead of learning patterns that generalize.
+
+We divide data into three sets.
+
+Typical 70 / 15 / 15 split
+
+70%
+
+Training
+
+Learn parameters
+
+15%
+
+Validation
+
+Choose settings
+
+15%
+
+Test
+
+Final evaluation
+
+### Training set
+
+The model learns patterns and adjusts its parameters using this data.
+
+### Validation set
+
+Used to compare models, tune hyperparameters and make development decisions.
+
+### Test set
+
+Used for a final evaluation after model development decisions are complete.
+
+Golden rule: Don't repeatedly use the test set to tune your model. That would make the test set part of the development process.
+
+## Python implementation
+
+```
+from sklearn.model_selection import train_test_split# First separate the test setX_train_val, X_test, y_train_val, y_test = train_test_split(    X, y,    test_size=0.15,    random_state=42)# Then separate validation from remaining dataX_train, X_val, y_train, y_val = train_test_split(    X_train_val,    y_train_val,    test_size=0.1765,    random_state=42)print("Train:", X_train.shape)print("Validation:", X_val.shape)print("Test:", X_test.shape)
+```
+
+Why `0.1765`?
+
+Because:
+
+\\[ 0.1765\times0.85\approx0.15 \\]
+
+So validation becomes approximately 15% of the original dataset.
+
+`random_state=42` makes the random split reproducible.
+
+# 6. Overfitting vs Underfitting
+
+You learned the bias–variance intuition on Day 5. Today let's connect it to the training workflow.
+
+[Bias-Variance Tradeoff: Practical Approaches to Prevent Overfitting and Underfitting in Machine Learning | by sumit gaurav | Medium](https://images.openai.com/static-rsc-4/ap0Hdk-L8VTx-FWn2yK-tIDw7TN84anyWj9YhrOPaY2c0rGcKXdWmetYgaBUiDe3hy-s-xXtbfKOtls5WQ46uhBM0g8aXAP18LgGjMKIrFhIOsUUoC0btB02xaZ-du0z1Cwkp996OOQg9VTek-GCizyjd_7dAJiLy7nKoRZiV0Y?purpose=inline)
+
+Underfitting
+
+Model is too simple.
+
+- Training error: high
+- Validation error: high
+
+[The Problem of overfitting and underitting | Lasse Schultebraucks](https://images.openai.com/static-rsc-4/ZeqVwHIFmafipMA9NJ8fVp5gpFPaq_gmIdBTMq_eiWX3HRM3VwMxLEsYACEH7SGQKd5a8BQ-8QjdBfo2JqmBo530468yRFnjR2LYF8QQq5-68V0Ubt9zBpHi3wjbPOmFM1p3Uo7AJw0ZzJNiFq30kWeBf3xjykhuPpBJjYkNBx4?purpose=inline)
+
+Overfitting
+
+Model memorizes training patterns.
+
+- Training error: low
+- Validation error: high
+
+### Ideal model
+
+A good model learns useful patterns from training data and performs well on unseen validation/test data.
+
+Possible solutions:
+
+| Problem      | Possible solution                                                     |
+| ------------ | --------------------------------------------------------------------- |
+| Underfitting | More useful features, greater model capacity                          |
+| Overfitting  | Regularization, more representative data, simpler model               |
+| Overfitting  | Cross-validation, early stopping, data augmentation where appropriate |
+
+# 7. Data Leakage — A Critical Engineering Concept
+
+Data leakage occurs when information unavailable at prediction time improperly influences training or evaluation.
+
+Example:
+
+You're predicting whether a customer will leave a company.
+
+Features:
+
+```
+Age
+Salary
+Login frequency
+Support tickets
+Account closure date
+```
+
+If `account_closure_date` is used to predict churn, the model has effectively been given information about the outcome.
+
+This is target leakage.
+
+Another common example:
+
+You standardize the entire dataset before splitting it into training and test sets.
+
+The scaler has then learned information from the test distribution.
+
+Correct approach:
+
+```
+Split data
+    ↓
+Fit scaler on training data
+    ↓
+Transform training data
+    ↓
+Transform validation/test using same scaler
+```
+
+Python:
+
+```
+from sklearn.preprocessing import StandardScalerscaler = StandardScaler()X_train_scaled = scaler.fit_transform(X_train)X_val_scaled = scaler.transform(X_val)X_test_scaled = scaler.transform(X_test)
+```
+
+Notice:
+
+- `fit_transform()` on training data.
+- `transform()` on validation and test data.
+
+This distinction is essential.
+
+# 8. The Complete Machine Learning Workflow
+
+This is the workflow you'll follow in real projects.
+
+## ML Engineering Pipeline
+
+1. Problem definition
+
+   What are we trying to predict or solve?
+2. Data collection
+
+   Gather data from databases, APIs, files or other sources.
+3. Data cleaning
+
+   Handle missing values, duplicates, invalid records and inconsistent formats.
+4. EDA
+
+   Understand distributions, relationships and data quality.
+5. Feature engineering
+
+   Select, transform or create useful input variables.
+6. Train / validation / test split
+
+   Establish a reliable evaluation strategy.
+7. Model selection and training
+
+   Select an appropriate algorithm and train it.
+8. Evaluation
+
+   Measure performance using suitable metrics.
+9. Deployment
+
+   Make predictions available through an application or API.
+10. Monitoring
+
+    Monitor prediction quality, data drift and system reliability.
+
+This is the difference between merely training a model and engineering an ML system.
+
+# 9. Hands-on Project — Student Performance Prediction
+
+Today's practical project
+
+Let's build your first complete supervised-learning workflow.
+
+## Step 1 — Install libraries
+
+```
+pip install numpy pandas matplotlib scikit-learn
+```
+
+## Step 2 — Create the dataset
+
+```
+import pandas as pddata = {    "study_hours": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],    "attendance": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95],    "assignments": [1, 1, 2, 2, 3, 3, 4, 4, 5, 5],    "marks": [35, 40, 45, 50, 58, 65, 72, 78, 85, 92]}df = pd.DataFrame(data)print(df.head())print(df.info())print(df.describe())
+```
+
+## Step 3 — Separate features and target
+
+```
+X = df.drop("marks", axis=1)y = df["marks"]
+```
+
+## Step 4 — Split data
+
+```
+from sklearn.model_selection import train_test_splitX_train, X_test, y_train, y_test = train_test_split(    X, y,    test_size=0.2,    random_state=42)
+```
+
+For this small introductory dataset, we're using a simple train/test split. In a larger project, reserve validation data or use cross-validation for model selection.
+
+## Step 5 — Train a model
+
+```
+from sklearn.linear_model import LinearRegressionmodel = LinearRegression()model.fit(X_train, y_train)
+```
+
+What happened?
+
+```
+X_train + y_train
+        ↓
+Linear Regression
+        ↓
+Learned weights and bias
+```
+
+## Step 6 — Make predictions
+
+```
+predictions = model.predict(X_test)print("Actual:", list(y_test))print("Predicted:", predictions)
+```
+
+## Step 7 — Evaluate
+
+```
+from sklearn.metrics import mean_absolute_errorfrom sklearn.metrics import mean_squared_error, r2_scoreimport numpy as npmae = mean_absolute_error(y_test, predictions)mse = mean_squared_error(y_test, predictions)rmse = np.sqrt(mse)r2 = r2_score(y_test, predictions)print("MAE:", mae)print("MSE:", mse)print("RMSE:", rmse)print("R2:", r2)
+```
+
+### Understand the metrics
+
+| Metric | Meaning                                                     |
+| ------ | ----------------------------------------------------------- |
+| MAE    | Average absolute prediction error                           |
+| MSE    | Average squared prediction error                            |
+| RMSE   | Square root of MSE                                          |
+| R²     | Relative goodness of fit against a mean-prediction baseline |
+
+R² can be negative on test data when the model performs worse than predicting the test-set mean.
+
+# 10. Beyond the First Model — What Should an ML Engineer Check?
+
+Training a model is only one part of the job.
+
+You should also ask:
+
+1. Is the dataset representative of real-world data?
+2. Are there missing or incorrect values?
+3. Is there target leakage?
+4. Is the model overfitting?
+5. Is the chosen evaluation metric appropriate?
+6. Does the model perform consistently across important customer groups?
+7. How will predictions be served?
+8. How will performance be monitored after deployment?
+
+This is how you start developing an engineering mindset.
+
+# 11. Interview Preparation 🎯
+
+Q1. What is the difference between AI, ML and Deep Learning?
+
+> AI is the broader field of building systems that perform tasks associated with intelligence. Machine Learning is a subset of AI that learns patterns from data. Deep Learning is a subset of ML that uses multi-layer neural networks.
+
+Q2. Regression vs classification?
+
+> Regression predicts continuous numerical values, while classification predicts discrete categories or class labels.
+
+Q3. Why do we split a dataset?
+
+> To train the model, make development decisions using validation data, and independently evaluate its final generalization performance using test data.
+
+Q4. What is data leakage?
+
+> Data leakage occurs when information that should not be available during model training or prediction influences the model, resulting in misleading evaluation or unrealistic performance.
+
+Q5. What is generalization?
+
+> Generalization is a model's ability to perform well on new, unseen data rather than only on the examples it was trained on.
+
+Q6. What is the difference between a parameter and a hyperparameter?
+
+| Parameter               | Hyperparameter                       |
+| ----------------------- | ------------------------------------ |
+| Learned during training | Set before or during model selection |
+| Weights and bias        | Learning rate                        |
+| Regression coefficients | Tree depth                           |
+| Neural network weights  | Batch size                           |
+
+# 12. Day 11 Practical Assignment
+
+Complete these independently:
+
+- Explain the four ML learning paradigms with examples.
+- Identify features and target in a dataset.
+- Explain regression vs classification.
+- Perform a train/test split.
+- Train Linear Regression using scikit-learn.
+- Calculate MAE, MSE, RMSE and R².
+- Explain data leakage using your own example.
+- Identify whether a model is underfitting or overfitting from training and validation results.
+
+## Knowledge checkpoint
+
+Quick knowledge checkpoint
+
+5 questions
+
+1\. A model predicts the selling price of a house. Which task is this?
+
+Regression
+
+Classification
+
+Clustering
+
+Reinforcement learning
+
+2\. Which dataset should be used for the final independent evaluation after model selection?
+
+Training set
+
+Validation set
+
+Test set
+
+The full dataset used for tuning
+
+3\. You fit a StandardScaler using both training and test data before splitting. What is the issue?
+
+Underfitting
+
+Data leakage
+
+Class imbalance
+
+Feature selection
+
+4\. A model learns from a small labelled dataset and a larger unlabelled dataset. Which paradigm is this?
+
+Supervised learning
+
+Unsupervised learning
+
+Semi-supervised learning
+
+Reinforcement learning
+
+5\. A model has very low training error but high validation error. What is the likely problem?
+
+Underfitting
+
+Overfitting
+
+Perfect generalization
+
+Insufficient target labels
+
+Submit answers
+
+# 13. Day 11 Mindmap
+
+```
+                 MACHINE LEARNING
+                        │
+           ┌────────────┼─────────────┐
+           ↓            ↓             ↓
+       Supervised   Unsupervised  Reinforcement
+           │
+      ┌────┴─────┐
+      ↓          ↓
+  Regression  Classification
+      │          │
+  Numerical    Categories
+
+           ML WORKFLOW
+                │
+         Data Collection
+                ↓
+          Data Cleaning
+                ↓
+              EDA
+                ↓
+        Feature Engineering
+                ↓
+         Dataset Splitting
+                ↓
+        Model Training
+                ↓
+            Evaluation
+                ↓
+           Deployment
+                ↓
+            Monitoring
+```
+
+# 📚 AI/ML ENGINEER — PROGRESS TRACKER
+
+| Day | Topic                                               | Status |
+| --- | --------------------------------------------------- | ------ |
+| 1   | AI/ML Roadmap + Methodology                         | ✅      |
+| 2   | NumPy Fundamentals                                  | ✅      |
+| 3   | Pandas + Data Cleaning + EDA                        | ✅      |
+| 4   | Visualization + Statistical EDA                     | ✅      |
+| 5   | Statistics + Probability + Bias–Variance            | ✅      |
+| 6   | Bayes + Correlation + Sampling                      | ✅      |
+| 7   | Linear Algebra Fundamentals                         | ✅      |
+| 8   | Eigenvalues + Eigenvectors + PCA                    | ✅      |
+| 9   | Calculus + Gradients + Backpropagation              | ✅      |
+| 10  | Optimization + Loss Functions + Regularization      | ✅      |
+| 11  | Machine Learning Foundations + Complete ML Workflow | 🔥     |
+
+## 🔜 Day 12 — Supervised Learning: Linear Regression in Depth
+
+We'll cover:
+
+- Simple vs multiple linear regression
+- Mathematical derivation
+- Ordinary Least Squares
+- Cost function
+- Gradient descent vs normal equation
+- Assumptions of linear regression
+- Residual analysis
+- Multicollinearity
+- Polynomial regression
+- A complete house-price prediction project
+
+Today's engineering principle:
+
+> A good ML engineer doesn't just build a model that performs well on training data. They build a model that generalizes to unseen data, can be evaluated honestly, and can be reliably used in the real world.
