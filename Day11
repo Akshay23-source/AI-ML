@@ -1,0 +1,1421 @@
+# 🚀 AI/ML ENGINEER — DAY 12/120  
+# **Supervised Learning: Linear Regression in Depth**
+
+## 🎯 Today’s Goal
+
+Today you will master **Linear Regression** both **theoretically and practically**—from the mathematical equation to building and evaluating a real model.
+
+By the end, you should understand:
+
+- Simple vs Multiple Linear Regression
+- How Linear Regression actually learns
+- Ordinary Least Squares (OLS)
+- Cost function and Residuals
+- Gradient Descent vs Normal Equation
+- Assumptions of Linear Regression
+- Multicollinearity
+- Polynomial Regression
+- Evaluation metrics
+- A practical House Price Prediction project
+- Interview questions and answers
+
+---
+
+# 1. Executive Summary & Core Intuition
+
+## What is Linear Regression?
+
+**Linear Regression** is a supervised machine-learning algorithm used to predict a **continuous numerical value** by learning the relationship between input features and a target variable.
+
+For example:
+
+```text
+House Area + Bedrooms + Location Score
+                    ↓
+             Linear Regression
+                    ↓
+              House Price
+```
+
+The model learns the best relationship between the inputs and output.
+
+---
+
+## 🧠 The ELI5 Mental Model
+
+Imagine you are trying to predict a student's marks based on their study hours.
+
+You observe:
+
+```text
+Study more → Usually score more
+```
+
+Linear Regression tries to draw the **best possible straight line** through the data.
+
+```text
+Marks
+  ↑
+90 |                         ●
+80 |                     ●
+70 |                 ●
+60 |             ●
+50 |         ●
+40 |     ●
+   └────────────────────────────→ Study Hours
+```
+
+That line helps us estimate the marks for a new student.
+
+---
+
+# 2. In-Depth Technical Mechanics
+
+# A. Simple Linear Regression
+
+Simple Linear Regression uses **one input feature**.
+
+The equation is:
+
+\[
+\boxed{\hat{y}=wx+b}
+\]
+
+Where:
+
+- \(x\) = input feature
+- \(\hat y\) = predicted output
+- \(w\) = weight / slope / coefficient
+- \(b\) = bias / intercept
+
+---
+
+## Example
+
+Suppose:
+
+\[
+\hat y=5x+10
+\]
+
+If:
+
+```text
+x = Study Hours = 4
+```
+
+Then:
+
+\[
+\hat y=5(4)+10
+\]
+
+\[
+\hat y=30
+\]
+
+Predicted marks:
+
+```text
+30
+```
+
+---
+
+## What does the slope mean?
+
+Suppose:
+
+\[
+\hat y=5x+10
+\]
+
+The coefficient:
+
+\[
+w=5
+\]
+
+means:
+
+> For every one-unit increase in \(x\), the predicted output increases by approximately 5 units, assuming the model assumptions hold.
+
+The intercept:
+
+\[
+b=10
+\]
+
+is the model's prediction when \(x=0\).
+
+---
+
+# B. Multiple Linear Regression
+
+Real-world problems usually have multiple features.
+
+Example: House Price Prediction.
+
+Features:
+
+```text
+Area
+Bedrooms
+Bathrooms
+Age
+Location Score
+```
+
+The equation becomes:
+
+\[
+\boxed{
+\hat y=
+w_1x_1+w_2x_2+w_3x_3+\cdots+w_nx_n+b
+}
+\]
+
+For example:
+
+\[
+Price=
+5000(Area)+200000(Bedrooms)+b
+\]
+
+Each feature gets its own learned coefficient.
+
+---
+
+# C. Matrix Form ⭐
+
+In machine learning, we commonly write Linear Regression as:
+
+\[
+\boxed{
+\hat{y}=XW+b
+}
+\]
+
+Where:
+
+- \(X\) = feature matrix
+- \(W\) = weight vector
+- \(b\) = bias
+
+Example:
+
+\[
+X=
+\begin{bmatrix}
+2 & 1\\
+3 & 2\\
+4 & 2
+\end{bmatrix}
+\]
+
+Each row represents one example.
+
+Each column represents one feature.
+
+---
+
+# 3. How Does Linear Regression Learn?
+
+The model initially does not know the correct weights.
+
+Suppose:
+
+```text
+Initial:
+w = 0
+b = 0
+```
+
+Then:
+
+```text
+Input
+  ↓
+Prediction
+  ↓
+Compare with Actual Value
+  ↓
+Calculate Error
+  ↓
+Calculate Loss
+  ↓
+Update w and b
+  ↓
+Repeat
+```
+
+This is the fundamental ML learning loop you studied on **Day 10**.
+
+---
+
+# 4. Residuals
+
+A **residual** is the difference between the actual and predicted value.
+
+\[
+\boxed{Residual=y-\hat y}
+\]
+
+Example:
+
+```text
+Actual price      = 80
+Predicted price   = 70
+```
+
+Residual:
+
+\[
+80-70=10
+\]
+
+A positive residual means the model predicted too low.
+
+A negative residual means the model predicted too high.
+
+---
+
+# 5. Ordinary Least Squares (OLS) ⭐⭐⭐⭐⭐
+
+OLS is the classical method used to fit Linear Regression.
+
+The idea:
+
+> Find the line that minimizes the sum of squared residuals.
+
+Mathematically:
+
+\[
+\boxed{
+\sum_{i=1}^{n}(y_i-\hat y_i)^2
+}
+\]
+
+Why square the residuals?
+
+### 1. Negative and positive errors don't cancel
+
+Without squaring:
+
+```text
++10 + (-10) = 0
+```
+
+But both predictions were wrong.
+
+---
+
+### 2. Large errors are penalized more
+
+```text
+Error = 2 → 4
+Error = 10 → 100
+```
+
+---
+
+### 3. Mathematical optimization becomes convenient
+
+The squared loss is differentiable and works well with optimization techniques.
+
+---
+
+# 6. Cost Function
+
+For Linear Regression, we commonly use Mean Squared Error:
+
+\[
+\boxed{
+J(w,b)=
+\frac{1}{n}
+\sum_{i=1}^{n}
+(\hat y_i-y_i)^2
+}
+\]
+
+The goal:
+
+\[
+\boxed{
+\min J(w,b)
+}
+\]
+
+We want the values of \(w\) and \(b\) that produce the smallest error.
+
+---
+
+# 7. Gradient Descent for Linear Regression
+
+For:
+
+\[
+\hat y=wx+b
+\]
+
+We calculate gradients.
+
+### Gradient with respect to \(w\):
+
+\[
+\frac{\partial J}{\partial w}
+=
+\frac{2}{n}
+\sum x_i(\hat y_i-y_i)
+\]
+
+### Gradient with respect to \(b\):
+
+\[
+\frac{\partial J}{\partial b}
+=
+\frac{2}{n}
+\sum(\hat y_i-y_i)
+\]
+
+Then update:
+
+\[
+w=w-\alpha\frac{\partial J}{\partial w}
+\]
+
+\[
+b=b-\alpha\frac{\partial J}{\partial b}
+\]
+
+Where:
+
+\[
+\alpha
+\]
+
+is the learning rate.
+
+---
+
+# 🧠 Mental Model
+
+Think of the loss function as a valley.
+
+```text
+Loss
+ ↑
+
+        ●
+      /   \
+    /       \
+  /           \
+ /      ↓       \
+/_______●________\ → Weight
+        Minimum
+```
+
+Gradient Descent repeatedly asks:
+
+> Which direction takes me downhill?
+
+Then:
+
+```text
+Calculate slope
+        ↓
+Move downhill
+        ↓
+Calculate again
+        ↓
+Move again
+```
+
+---
+
+# 8. Gradient Descent vs Normal Equation
+
+## Gradient Descent
+
+Uses repeated updates.
+
+```text
+Initialize weights
+        ↓
+Calculate predictions
+        ↓
+Calculate gradient
+        ↓
+Update weights
+        ↓
+Repeat
+```
+
+### Advantages
+
+- Works well for large datasets
+- Scales to many ML and deep-learning problems
+- Useful when closed-form solutions are impractical
+
+### Disadvantages
+
+- Requires learning-rate selection
+- Requires iterations
+- Can be slow
+
+---
+
+## Normal Equation
+
+For classical ordinary least squares:
+
+\[
+\boxed{
+W=(X^TX)^{-1}X^Ty
+}
+\]
+
+This directly computes a solution under appropriate conditions.
+
+### Important limitation 🚨
+
+The explicit inverse can be numerically unstable or impractical when \(X^TX\) is singular or poorly conditioned.
+
+In practice, numerical solvers such as QR decomposition or SVD are often preferred over literally computing the matrix inverse.
+
+---
+
+# 🔥 Interview Point
+
+If asked:
+
+> Should we always calculate \((X^TX)^{-1}\)?
+
+Say:
+
+> No. Explicit matrix inversion can be numerically unstable and expensive. Practical implementations often use more stable numerical methods such as QR decomposition or SVD.
+
+That is a strong technical answer.
+
+---
+
+# 9. Assumptions of Linear Regression ⭐⭐⭐⭐⭐
+
+Linear Regression has important assumptions.
+
+---
+
+## 1️⃣ Linearity
+
+The relationship should be approximately linear in the parameters.
+
+Example:
+
+```text
+Study Hours ↑
+Marks generally ↑
+```
+
+A straight-line model may be reasonable.
+
+---
+
+## 2️⃣ Independence of Errors
+
+Observations/errors should not have problematic dependencies.
+
+This is especially important in:
+
+- Time series
+- Sequential data
+- Repeated measurements
+
+---
+
+## 3️⃣ Homoscedasticity
+
+The variance of errors should be reasonably consistent across prediction levels.
+
+Good:
+
+```text
+     ● ●
+   ● ● ●
+ ● ● ● ●
+----------------
+```
+
+Problematic heteroscedasticity can look like errors spreading out as predictions increase:
+
+```text
+  ●
+   ● ●
+    ●   ●
+      ●     ●
+```
+
+---
+
+## 4️⃣ Residual Normality
+
+For classical statistical inference, residuals are often assumed to be approximately normally distributed.
+
+Important nuance:
+
+> Normality is more important for confidence intervals and hypothesis testing than for simply obtaining least-squares predictions.
+
+🔥 Interview-level distinction.
+
+---
+
+## 5️⃣ Low Multicollinearity
+
+Features should not be excessively correlated with each other.
+
+Example:
+
+```text
+House Area
+House Area in Square Feet
+House Area in Square Meters
+```
+
+These features contain highly overlapping information.
+
+This can make coefficients unstable and difficult to interpret.
+
+---
+
+# 10. Multicollinearity ⭐⭐⭐⭐⭐
+
+Suppose we use:
+
+```text
+Years of Experience
+Age
+```
+
+These may be correlated.
+
+Or:
+
+```text
+Monthly Income
+Annual Income
+```
+
+These contain almost the same information.
+
+### Problems:
+
+- Unstable coefficients
+- Difficult interpretation
+- Increased variance in coefficient estimates
+
+### Solutions:
+
+- Remove redundant features
+- Combine features when appropriate
+- Use domain knowledge
+- Use regularization such as Ridge or Lasso
+- Diagnose using correlation analysis and VIF
+
+---
+
+# 11. Feature Scaling — Do We Need It?
+
+For ordinary Linear Regression solved analytically, feature scaling is often **not required**.
+
+But scaling can be useful when:
+
+- Using Gradient Descent
+- Features have vastly different scales
+- Numerical optimization benefits from better conditioning
+- Regularization is applied
+
+Example:
+
+```text
+Age          → 25
+Salary       → 1,500,000
+House Area   → 2,000
+```
+
+Different scales can make optimization behavior harder to manage.
+
+---
+
+# 12. Evaluation Metrics
+
+You learned these on Day 10. Let's connect them directly to Linear Regression.
+
+## MAE
+
+\[
+MAE=
+\frac1n\sum|y-\hat y|
+\]
+
+Easy to interpret.
+
+---
+
+## MSE
+
+\[
+MSE=
+\frac1n\sum(y-\hat y)^2
+\]
+
+Penalizes large errors heavily.
+
+---
+
+## RMSE
+
+\[
+RMSE=\sqrt{MSE}
+\]
+
+Returns error to the original target units.
+
+---
+
+## R² Score ⭐⭐⭐⭐⭐
+
+\[
+\boxed{
+R^2=
+1-
+\frac{\sum(y_i-\hat y_i)^2}
+{\sum(y_i-\bar y)^2}
+}
+\]
+
+Intuition:
+
+> R² compares the model against a baseline that predicts the mean target value.
+
+Typically:
+
+```text
+R² = 1     → Perfect prediction
+R² = 0     → Comparable to mean baseline
+R² < 0     → Worse than the mean baseline
+```
+
+🚨 **Interview trap:** R² is not guaranteed to be between 0 and 1 on unseen test data.
+
+---
+
+# 13. Polynomial Regression
+
+What if the relationship is not well represented by a straight line?
+
+Example:
+
+```text
+Performance
+     ↑
+     |        ●
+     |     ●     ●
+     |   ●         ●
+     | ●             ●
+     └────────────────→ Input
+```
+
+We can create polynomial features.
+
+For example:
+
+\[
+\boxed{
+y=w_1x+w_2x^2+b
+}
+\]
+
+Or:
+
+\[
+y=w_1x+w_2x^2+w_3x^3+b
+\]
+
+Important:
+
+> Polynomial Regression is still linear with respect to the learned coefficients \(w\).
+
+That is an excellent interview point.
+
+---
+
+# 🧪 PRACTICAL SECTION — BUILD LINEAR REGRESSION
+
+## Project: House Price Prediction
+
+### Step 1 — Import libraries
+
+```python
+import numpy as np
+import pandas as pd
+```
+
+---
+
+## Step 2 — Create sample data
+
+```python
+data = {
+    "area": [800, 1000, 1200, 1500, 1800, 2000, 2500, 3000],
+    "bedrooms": [1, 2, 2, 3, 3, 4, 4, 5],
+    "age": [15, 12, 10, 8, 7, 5, 3, 2],
+    "price": [30, 40, 48, 60, 70, 80, 100, 125]
+}
+
+df = pd.DataFrame(data)
+
+print(df)
+```
+
+---
+
+# Step 3 — Separate Features and Target
+
+```python
+X = df[["area", "bedrooms", "age"]]
+y = df["price"]
+```
+
+Remember:
+
+```text
+X → Inputs
+y → Output
+```
+
+---
+
+# Step 4 — Train/Test Split
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.25,
+    random_state=42
+)
+```
+
+---
+
+# Step 5 — Train the Model
+
+```python
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+
+model.fit(X_train, y_train)
+```
+
+The model learns:
+
+```text
+Coefficient for area
+Coefficient for bedrooms
+Coefficient for age
+Bias / Intercept
+```
+
+---
+
+# Step 6 — Inspect Learned Parameters
+
+```python
+print("Coefficients:", model.coef_)
+print("Intercept:", model.intercept_)
+```
+
+Each coefficient represents the learned relationship between that feature and the target **while holding the other included features constant**, subject to the model assumptions.
+
+---
+
+# Step 7 — Make Predictions
+
+```python
+predictions = model.predict(X_test)
+
+print("Actual:")
+print(y_test.values)
+
+print("\nPredicted:")
+print(predictions)
+```
+
+---
+
+# Step 8 — Evaluate
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error, r2_score
+
+mae = mean_absolute_error(y_test, predictions)
+mse = mean_squared_error(y_test, predictions)
+rmse = np.sqrt(mse)
+r2 = r2_score(y_test, predictions)
+
+print("MAE:", mae)
+print("MSE:", mse)
+print("RMSE:", rmse)
+print("R²:", r2)
+```
+
+---
+
+# 14. Build Linear Regression From Scratch 🔥
+
+Now let's implement the learning algorithm ourselves.
+
+Dataset:
+
+```python
+import numpy as np
+
+X = np.array([1, 2, 3, 4, 5], dtype=float)
+y = np.array([4, 7, 10, 13, 16], dtype=float)
+```
+
+The hidden relationship is:
+
+\[
+y=3x+1
+\]
+
+Our algorithm must discover it.
+
+---
+
+## Gradient Descent Implementation
+
+```python
+import numpy as np
+
+X = np.array([1, 2, 3, 4, 5], dtype=float)
+y = np.array([4, 7, 10, 13, 16], dtype=float)
+
+w = 0.0
+b = 0.0
+
+learning_rate = 0.01
+epochs = 1000
+
+for epoch in range(epochs):
+
+    # Prediction
+    y_pred = w * X + b
+
+    # Error
+    error = y_pred - y
+
+    # Loss
+    loss = np.mean(error ** 2)
+
+    # Gradients
+    dw = np.mean(2 * X * error)
+    db = np.mean(2 * error)
+
+    # Update parameters
+    w = w - learning_rate * dw
+    b = b - learning_rate * db
+
+print("Weight:", w)
+print("Bias:", b)
+print("Final Loss:", loss)
+```
+
+Expected:
+
+```text
+Weight ≈ 3
+Bias ≈ 1
+```
+
+🎯 You have now built Linear Regression without using scikit-learn.
+
+---
+
+# 15. Prediction Using Your Model
+
+```python
+new_x = 10
+
+prediction = w * new_x + b
+
+print("Prediction:", prediction)
+```
+
+Expected:
+
+```text
+≈ 31
+```
+
+---
+
+# 16. Failure Modes 🚨
+
+Linear Regression can perform poorly when:
+
+### ❌ Strong nonlinear relationships
+
+Example:
+
+```text
+Complex curve
+```
+
+Possible alternatives:
+
+- Polynomial features
+- Decision Trees
+- Random Forests
+- Gradient Boosting
+- Neural Networks
+
+---
+
+### ❌ Extreme Outliers
+
+Because squared error can heavily penalize outliers.
+
+Possible approaches:
+
+- Investigate data quality
+- Robust regression
+- MAE-based objectives
+- Appropriate preprocessing
+
+---
+
+### ❌ Data Leakage
+
+If future information accidentally enters training, your evaluation becomes unrealistic.
+
+---
+
+### ❌ Distribution Shift
+
+Training data:
+
+```text
+Old house market
+```
+
+Production data:
+
+```text
+Completely changed market
+```
+
+The learned relationship may no longer generalize.
+
+---
+
+# 17. Real-World Applications
+
+## 🏠 Real Estate
+
+Predict:
+
+- House prices
+- Rental prices
+- Property valuation
+
+---
+
+## 💰 Finance
+
+Predict:
+
+- Revenue
+- Sales
+- Demand
+- Financial metrics
+
+---
+
+## 🚚 Logistics
+
+Predict:
+
+- Delivery time
+- Fuel consumption
+- Demand volume
+
+---
+
+## 🌾 Agriculture
+
+For your **Farm Marketplace / Agriculture projects**, regression can predict:
+
+- Crop prices
+- Expected yield
+- Market demand
+- Delivery duration
+
+Example:
+
+```text
+Rainfall
+Temperature
+Soil Features
+Fertilizer Usage
+        ↓
+Regression Model
+        ↓
+Expected Crop Yield
+```
+
+---
+
+# 18. Trade-Off Analysis
+
+| Advantage | Limitation |
+|---|---|
+| Simple and interpretable | Limited for complex nonlinear patterns |
+| Fast to train | Sensitive to problematic outliers with OLS |
+| Good baseline model | Depends on data quality |
+| Easy to explain | Multicollinearity can complicate interpretation |
+| Strong mathematical foundation | May underfit complex relationships |
+
+---
+
+# 19. Alternatives
+
+### Decision Tree Regressor
+
+Better for:
+
+- Nonlinear relationships
+- Complex feature interactions
+
+---
+
+### Random Forest
+
+Better for:
+
+- Complex tabular data
+- Nonlinear patterns
+
+Trade-off:
+
+- Less interpretable than simple Linear Regression
+
+---
+
+### Gradient Boosting
+
+Often strong for:
+
+- Structured/tabular datasets
+
+Examples:
+
+- XGBoost
+- LightGBM
+- CatBoost
+
+---
+
+### Neural Networks
+
+Useful when:
+
+- Relationships are highly complex
+- Large datasets are available
+
+But often unnecessary for simple tabular regression problems.
+
+🔥 **Engineering lesson:**
+
+> Always start with a strong baseline before jumping to a more complex model.
+
+---
+
+# 20. Hands-On Portfolio Projects
+
+## 🟢 Project 1 — Beginner
+
+### Student Score Predictor
+
+Inputs:
+
+```text
+Study Hours
+Attendance
+Assignments
+```
+
+Output:
+
+```text
+Predicted Marks
+```
+
+Skills demonstrated:
+
+- Data preprocessing
+- Feature selection
+- Train/test split
+- Linear Regression
+- Evaluation metrics
+
+---
+
+## 🟡 Project 2 — Intermediate
+
+### Crop Yield Prediction
+
+Inputs:
+
+```text
+Rainfall
+Temperature
+Soil Type
+Fertilizer Usage
+```
+
+Output:
+
+```text
+Expected Crop Yield
+```
+
+Add:
+
+- EDA
+- Feature engineering
+- Model comparison
+- API deployment
+
+---
+
+## 🔴 Project 3 — Advanced / Production Grade
+
+### Real Estate Price Prediction API
+
+Architecture:
+
+```text
+Dataset
+   ↓
+Data Pipeline
+   ↓
+Feature Engineering
+   ↓
+Model Training
+   ↓
+Model Evaluation
+   ↓
+FastAPI
+   ↓
+REST API
+   ↓
+React / Mobile App
+```
+
+Advanced additions:
+
+- Model versioning
+- Docker
+- Input validation
+- Prediction logging
+- Monitoring
+- Retraining pipeline
+
+This would be a strong **AI/ML portfolio project**.
+
+---
+
+# 21. Explain to an Interviewer — 60-Second Script 🎤
+
+> Linear Regression is a supervised machine-learning algorithm used to predict continuous numerical values. It learns a linear relationship between input features and a target variable, typically represented as y-hat equals XW plus b. During training, the model finds coefficients that minimize a loss function, commonly the sum or mean of squared residuals. This can be solved using methods such as ordinary least squares or iterative optimization like gradient descent. Linear Regression is simple, fast, and interpretable, making it a strong baseline model, but it may struggle with complex nonlinear relationships, significant outliers, or multicollinearity. In practice, I evaluate it using metrics such as MAE, RMSE, and R-squared and validate its performance on unseen data.
+
+---
+
+# 22. Top 3 Interview Questions 🎯
+
+## Q1. What is the difference between Simple and Multiple Linear Regression?
+
+**Answer:**
+
+> Simple Linear Regression uses one independent feature to predict a target, while Multiple Linear Regression uses multiple input features. Their core objective is the same: learning coefficients that minimize prediction error.
+
+---
+
+## Q2. What is Ordinary Least Squares?
+
+**Answer:**
+
+> Ordinary Least Squares is a method for estimating Linear Regression coefficients by minimizing the sum of squared residuals between actual and predicted values.
+
+---
+
+## Q3. What are the assumptions of Linear Regression?
+
+**Answer:**
+
+> Important assumptions include an appropriate linear relationship, reasonably independent errors, approximately constant error variance, and limited problematic multicollinearity. Normality of residuals is particularly relevant for classical statistical inference.
+
+🔥 This answer is more technically accurate than simply memorizing a list.
+
+---
+
+# 🧠 DAY 12 MASTER MINDMAP
+
+```text
+                    LINEAR REGRESSION
+                           │
+              ┌────────────┴────────────┐
+              ↓                         ↓
+         Simple LR                 Multiple LR
+              │                         │
+              └────────────┬────────────┘
+                           ↓
+                     ŷ = XW + b
+                           │
+                           ↓
+                       Residuals
+                           │
+                           ↓
+                     Loss Function
+                           │
+                    MSE / OLS
+                           │
+             ┌─────────────┴─────────────┐
+             ↓                           ↓
+      Gradient Descent              Closed-form Solver
+             │
+             ↓
+       Learn Parameters
+             │
+             ↓
+        Evaluate Model
+             │
+    ┌────────┼─────────┐
+    ↓        ↓         ↓
+   MAE      RMSE      R²
+             │
+             ↓
+      Check Assumptions
+             │
+    ┌────────┼─────────────┐
+    ↓        ↓             ↓
+ Linearity  Error Variance  Multicollinearity
+```
+
+---
+
+# 🧪 DAY 12 PRACTICAL ASSIGNMENT
+
+Complete these today:
+
+### Challenge 1
+Build Linear Regression using:
+
+```text
+Study Hours → Marks
+```
+
+### Challenge 2
+Build Multiple Linear Regression using:
+
+```text
+Study Hours
+Attendance
+Assignments
+        ↓
+Marks
+```
+
+### Challenge 3 🔥
+Build Linear Regression **from scratch** using Gradient Descent.
+
+Your code must:
+
+- Initialize `w` and `b`
+- Calculate predictions
+- Calculate MSE
+- Calculate gradients
+- Update parameters
+- Print final weight and bias
+
+---
+
+# 📚 AI/ML ENGINEER — LEARNING TRACKER
+
+| Day | Topic | Status |
+|---|---|---|
+| 1 | AI/ML Roadmap + Methodology | ✅ |
+| 2 | NumPy Fundamentals | ✅ |
+| 3 | Pandas + Data Cleaning + EDA | ✅ |
+| 4 | Visualization + Statistical EDA | ✅ |
+| 5 | Statistics + Probability + Bias–Variance | ✅ |
+| 6 | Bayes + Correlation + Sampling | ✅ |
+| 7 | Linear Algebra Fundamentals | ✅ |
+| 8 | Eigenvalues + Eigenvectors + PCA | ✅ |
+| 9 | Calculus + Gradients + Backpropagation | ✅ |
+| 10 | Optimization + Loss Functions + Regularization | ✅ |
+| 11 | Machine Learning Foundations + ML Workflow | ✅ |
+| **12** | **Linear Regression — Theory + Math + From Scratch + Practical** | **🔥 TODAY** |
+
+---
+
+# 🔜 DAY 13
+
+## **Logistic Regression in Depth**
+
+You will learn:
+
+- Why Logistic Regression is actually used for classification
+- Sigmoid function
+- Odds and Log-Odds
+- Decision boundaries
+- Binary Cross-Entropy
+- Gradient Descent for Logistic Regression
+- Multiclass classification
+- Softmax
+- Practical classification project
+- Confusion Matrix
+- Precision, Recall and F1-score
+
+### 🎯 Today's key takeaway:
+
+\[
+\boxed{
+\text{Linear Regression}
+=
+\text{Learn the relationship between features and a continuous target}
+}
+\]
+
+And the practical mindset is:
+
+\[
+\boxed{
+\text{Theory}
+\rightarrow
+\text{Math}
+\rightarrow
+\text{From Scratch}
+\rightarrow
+\text{Library}
+\rightarrow
+\text{Project}
+}
+\]
+
+🔥 **Day 12 complete — your next “Today's learning” will continue with Day 13.**
