@@ -1,0 +1,1270 @@
+# 🚀 AI/ML ENGINEER — DAY 15/120  
+# **K-Nearest Neighbors (KNN): Theory + Mathematics + Practical**
+
+Today we learn a very intuitive ML algorithm:
+
+> **“Tell me who your nearest neighbors are, and I can often predict who you are.”**
+
+KNN is simple, but it teaches several fundamental concepts used throughout Machine Learning: **distance, similarity, feature scaling, decision boundaries, and the curse of dimensionality**.
+
+---
+
+# 1. Executive Summary & Core Intuition
+
+## What is K-Nearest Neighbors (KNN)?
+
+**K-Nearest Neighbors (KNN)** is a supervised machine learning algorithm that predicts the output of a new data point by looking at the **K most similar or nearest data points** in the training dataset.
+
+For:
+
+- **Classification** → it uses majority voting.
+- **Regression** → it typically averages the values of nearby points.
+
+### Elevator pitch 🎤
+
+> KNN is a non-parametric, instance-based learning algorithm that makes predictions based on the labels or values of the nearest training examples according to a distance metric.
+
+---
+
+## 🧠 The ELI5 Mental Model
+
+Imagine you join a new neighborhood and want to predict whether someone likes cricket or football.
+
+You look at their **5 closest friends**:
+
+```text
+Friend 1 → Cricket
+Friend 2 → Cricket
+Friend 3 → Football
+Friend 4 → Cricket
+Friend 5 → Cricket
+```
+
+Majority:
+
+```text
+Cricket = 4
+Football = 1
+```
+
+So KNN predicts:
+
+> 🏏 **Cricket**
+
+The algorithm essentially says:
+
+> **Similar things tend to have similar outputs.**
+
+---
+
+# 2. In-Depth Technical Mechanics
+
+## Step-by-Step: How KNN Works
+
+Suppose we have a new data point:
+
+\[
+X_{new}
+\]
+
+### Step 1: Store the training data
+
+Unlike many algorithms, KNN does not necessarily learn a traditional mathematical model during training.
+
+It stores:
+
+```text
+Features + Labels
+```
+
+This is why KNN is called a **lazy learner**.
+
+---
+
+### Step 2: Calculate distance
+
+Calculate the distance between the new point and every training example.
+
+---
+
+### Step 3: Find the K nearest neighbors
+
+Example:
+
+```text
+Distances:
+
+Point A → 1.2
+Point B → 0.5
+Point C → 2.8
+Point D → 0.7
+Point E → 1.0
+```
+
+For:
+
+\[
+K=3
+\]
+
+Nearest neighbors:
+
+```text
+B → 0.5
+D → 0.7
+E → 1.0
+```
+
+---
+
+### Step 4: Make a prediction
+
+### Classification
+
+Use majority voting:
+
+```text
+Class A → 2 votes
+Class B → 1 vote
+
+Prediction → Class A
+```
+
+### Regression
+
+Use averaging:
+
+\[
+\hat{y} =
+\frac{y_1+y_2+\dots+y_K}{K}
+\]
+
+---
+
+# 3. Distance Metrics ⭐⭐⭐⭐⭐
+
+Distance is the heart of KNN.
+
+---
+
+## A. Euclidean Distance
+
+The most common distance metric.
+
+For two points:
+
+\[
+(x_1,y_1)
+\]
+
+and:
+
+\[
+(x_2,y_2)
+\]
+
+\[
+\boxed{
+d=
+\sqrt{(x_2-x_1)^2+(y_2-y_1)^2}
+}
+\]
+
+For multiple dimensions:
+
+\[
+\boxed{
+d=
+\sqrt{
+\sum_{i=1}^{n}(x_i-y_i)^2
+}
+}
+\]
+
+### Intuition
+
+Straight-line distance.
+
+```text
+A ●
+ \
+  \
+   ● B
+```
+
+---
+
+## B. Manhattan Distance
+
+\[
+\boxed{
+d=
+\sum |x_i-y_i|
+}
+\]
+
+Instead of travelling diagonally, imagine moving through city blocks.
+
+```text
+A ──┐
+    │
+    ● B
+```
+
+---
+
+## C. Minkowski Distance
+
+A general form of distance:
+
+\[
+\boxed{
+d=
+\left(
+\sum |x_i-y_i|^p
+\right)^{1/p}
+}
+\]
+
+Special cases:
+
+```text
+p = 1 → Manhattan Distance
+p = 2 → Euclidean Distance
+```
+
+---
+
+# 4. Choosing the Value of K ⭐⭐⭐⭐⭐
+
+The value of **K** controls model complexity.
+
+---
+
+## Small K
+
+Example:
+
+\[
+K=1
+\]
+
+The model looks at only one neighbor.
+
+### Advantages
+
+✅ Captures local patterns.
+
+### Problems
+
+❌ Sensitive to noise.  
+❌ Can overfit.
+
+---
+
+## Large K
+
+Example:
+
+\[
+K=50
+\]
+
+The model considers many neighbors.
+
+### Advantages
+
+✅ Smoother predictions.
+
+### Problems
+
+❌ May ignore local patterns.  
+❌ Can underfit.
+
+---
+
+# Bias-Variance Intuition
+
+```text
+Small K
+↓
+Low Bias
+High Variance
+↓
+Potential Overfitting
+```
+
+```text
+Large K
+↓
+High Bias
+Low Variance
+↓
+Potential Underfitting
+```
+
+---
+
+## How Do We Choose K?
+
+Use:
+
+- Validation data
+- Cross-validation
+- Hyperparameter tuning
+
+Example:
+
+```python
+from sklearn.model_selection import GridSearchCV
+```
+
+Try:
+
+```text
+K = 3
+K = 5
+K = 7
+K = 9
+```
+
+Choose based on validation performance.
+
+---
+
+# 5. Why Feature Scaling is Extremely Important 🚨
+
+Suppose your features are:
+
+```text
+Age:              18–60
+Annual Income:    ₹100,000–₹10,000,000
+```
+
+Distance calculations may be dominated by:
+
+```text
+Annual Income
+```
+
+because its numerical scale is much larger.
+
+Therefore, scale your features.
+
+---
+
+## StandardScaler
+
+\[
+z=
+\frac{x-\mu}{\sigma}
+\]
+
+Python:
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+
+X_test_scaled = scaler.transform(X_test)
+```
+
+🔥 **Interview answer:**
+
+> KNN is sensitive to feature scaling because its predictions depend directly on distance calculations. Features with larger numerical ranges can dominate the distance metric.
+
+---
+
+# 6. Classification Example
+
+Imagine this dataset:
+
+```text
+Hours Studied      Result
+
+2                  Fail
+3                  Fail
+4                  Fail
+7                  Pass
+8                  Pass
+9                  Pass
+```
+
+New student:
+
+```text
+Hours = 6
+```
+
+For:
+
+\[
+K=3
+\]
+
+Nearest students might be:
+
+```text
+4 → Fail
+7 → Pass
+8 → Pass
+```
+
+Votes:
+
+```text
+Pass → 2
+Fail → 1
+```
+
+Prediction:
+
+> ✅ **Pass**
+
+---
+
+# 7. KNN Decision Boundary
+
+KNN creates flexible decision boundaries.
+
+Unlike Logistic Regression, KNN does not assume one simple linear equation.
+
+Example:
+
+```text
+Class A     ● ● ●
+
+      Decision regions
+
+Class B            ▲ ▲ ▲
+```
+
+With small K, boundaries can become very irregular.
+
+With large K, boundaries become smoother.
+
+---
+
+# 8. Edge Cases & Failure Modes 🚨
+
+## ❌ Curse of Dimensionality ⭐⭐⭐⭐⭐
+
+As the number of features increases:
+
+```text
+10 dimensions
+↓
+100 dimensions
+↓
+1,000 dimensions
+```
+
+points become increasingly sparse.
+
+The idea of "nearest" becomes less meaningful.
+
+This is called the:
+
+\[
+\boxed{\text{Curse of Dimensionality}}
+\]
+
+### Solutions
+
+- Feature selection
+- PCA
+- Dimensionality reduction
+- Better similarity metrics
+- Alternative algorithms
+
+---
+
+## ❌ Slow Predictions
+
+KNN must calculate distances to many training points.
+
+Training:
+
+```text
+Fast
+```
+
+Prediction:
+
+```text
+Potentially Slow
+```
+
+This can be expensive for:
+
+```text
+Millions of records
+```
+
+---
+
+## ❌ Sensitive to Irrelevant Features
+
+If you add useless features, they can distort distances.
+
+---
+
+## ❌ Sensitive to Noise
+
+Especially when:
+
+\[
+K=1
+\]
+
+---
+
+# 9. Real-World Applications & Industry Use Cases
+
+## 🏥 Medical Diagnosis
+
+Input:
+
+```text
+Age
+Symptoms
+Blood Test Results
+Medical Measurements
+```
+
+The model finds similar patients and predicts:
+
+```text
+Disease / No Disease
+```
+
+---
+
+## 🛒 Recommendation Systems
+
+Find users similar to:
+
+```text
+User A
+```
+
+Then recommend items liked by similar users.
+
+⚠️ Note: Large modern recommender systems usually use more scalable approaches, embeddings, matrix factorization, or deep learning rather than basic KNN alone.
+
+---
+
+## 🏦 Fraud Detection
+
+Find transactions similar to known:
+
+```text
+Fraud
+```
+
+or:
+
+```text
+Genuine
+```
+
+transactions.
+
+---
+
+## 🖼️ Computer Vision
+
+KNN can be used for:
+
+- Image similarity
+- Face embedding comparison
+- Simple image classification
+
+Modern systems often perform KNN-style search over learned embeddings.
+
+---
+
+# 10. Branches & Variations
+
+## Weighted KNN
+
+Instead of giving every neighbor equal importance:
+
+```text
+Closer neighbor → Higher importance
+Farther neighbor → Lower importance
+```
+
+A common idea is:
+
+\[
+Weight=\frac{1}{Distance}
+\]
+
+This can improve local predictions.
+
+---
+
+## Radius Neighbors
+
+Instead of choosing exactly K neighbors:
+
+> Select every point within a certain radius.
+
+Useful when data density varies.
+
+---
+
+## Approximate Nearest Neighbors
+
+For large-scale applications, approximate methods can find similar points faster than exact brute-force search.
+
+Common modern use cases include searching through large embedding collections.
+
+---
+
+# 11. Data & Compute Requirements
+
+## Data Requirements
+
+KNN works best when:
+
+- Features are meaningful.
+- Data is reasonably clean.
+- Feature scaling is appropriate.
+- Dimensionality is manageable.
+
+---
+
+## Compute Requirements
+
+### Training
+
+Very low computational cost.
+
+Because KNN mainly stores data.
+
+### Inference
+
+Potentially expensive.
+
+For:
+
+\[
+N
+\]
+
+training samples and:
+
+\[
+D
+\]
+
+features, a naive prediction can require approximately:
+
+\[
+O(ND)
+\]
+
+distance-related computation per query.
+
+Memory can also become significant because training data must be retained.
+
+---
+
+# 12. Trade-Off Analysis
+
+| Feature | KNN |
+|---|---|
+| Training Speed | ⭐⭐⭐⭐⭐ |
+| Prediction Speed | ⭐⭐ |
+| Interpretability | ⭐⭐⭐⭐ |
+| Scaling to Huge Data | ⭐⭐ |
+| Nonlinear Patterns | ⭐⭐⭐⭐ |
+| Feature Scaling Importance | ⭐⭐⭐⭐⭐ |
+
+---
+
+## Advantages
+
+✅ Very intuitive  
+✅ No explicit distribution assumption  
+✅ Can model complex local boundaries  
+✅ Easy to implement  
+✅ Useful baseline
+
+---
+
+## Disadvantages
+
+❌ Slow prediction for large datasets  
+❌ Memory intensive  
+❌ Sensitive to scaling  
+❌ Struggles in high dimensions  
+❌ Sensitive to irrelevant features
+
+---
+
+# 13. Alternative Approaches
+
+| Alternative | Better When |
+|---|---|
+| Logistic Regression | Boundary is approximately linear |
+| Decision Trees | Rule-based relationships |
+| Random Forest | Complex tabular datasets |
+| XGBoost | High-performance structured data |
+| SVM | Certain high-dimensional classification problems |
+| Neural Networks | Large, complex datasets |
+| ANN Search | Large-scale similarity search |
+
+---
+
+# 14. Practical Implementation — KNN with Scikit-learn 🔥
+
+## Step 1: Load Dataset
+
+```python
+from sklearn.datasets import load_iris
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+```
+
+The Iris dataset contains flower measurements.
+
+Features include:
+
+```text
+Sepal Length
+Sepal Width
+Petal Length
+Petal Width
+```
+
+Target:
+
+```text
+Setosa
+Versicolor
+Virginica
+```
+
+---
+
+## Step 2: Split Data
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+```
+
+---
+
+## Step 3: Scale Features
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+
+X_test_scaled = scaler.transform(X_test)
+```
+
+---
+
+## Step 4: Train KNN
+
+```python
+from sklearn.neighbors import KNeighborsClassifier
+
+model = KNeighborsClassifier(
+    n_neighbors=5
+)
+
+model.fit(X_train_scaled, y_train)
+```
+
+---
+
+## Step 5: Predict
+
+```python
+y_pred = model.predict(X_test_scaled)
+
+print(y_pred)
+```
+
+---
+
+## Step 6: Evaluate
+
+```python
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+print(classification_report(
+    y_test,
+    y_pred,
+    target_names=iris.target_names
+))
+```
+
+---
+
+# 15. Find the Best K 🔥
+
+```python
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+
+parameters = {
+    "n_neighbors": [3, 5, 7, 9, 11],
+    "weights": ["uniform", "distance"]
+}
+
+grid = GridSearchCV(
+    KNeighborsClassifier(),
+    parameters,
+    cv=5,
+    scoring="accuracy"
+)
+
+grid.fit(X_train_scaled, y_train)
+
+print(grid.best_params_)
+print(grid.best_score_)
+```
+
+This is your first important exposure to:
+
+> **Hyperparameter tuning**
+
+---
+
+# 16. KNN From Scratch 🧠
+
+```python
+import numpy as np
+from collections import Counter
+
+def euclidean_distance(a, b):
+    return np.sqrt(
+        np.sum((a - b) ** 2)
+    )
+
+def knn_predict(X_train, y_train, x_new, k=3):
+
+    distances = []
+
+    for i in range(len(X_train)):
+
+        distance = euclidean_distance(
+            X_train[i],
+            x_new
+        )
+
+        distances.append(
+            (distance, y_train[i])
+        )
+
+    distances.sort(
+        key=lambda x: x[0]
+    )
+
+    k_nearest = distances[:k]
+
+    labels = [
+        label
+        for _, label in k_nearest
+    ]
+
+    return Counter(labels).most_common(1)[0][0]
+```
+
+---
+
+## Example
+
+```python
+X_train = np.array([
+    [1, 2],
+    [2, 3],
+    [3, 3],
+    [6, 7],
+    [7, 8]
+])
+
+y_train = np.array([
+    0,
+    0,
+    0,
+    1,
+    1
+])
+
+x_new = np.array([5, 6])
+
+prediction = knn_predict(
+    X_train,
+    y_train,
+    x_new,
+    k=3
+)
+
+print(prediction)
+```
+
+---
+
+# 17. Real-World Case Study
+
+## 🎬 Movie Recommendation System
+
+Suppose User A likes:
+
+```text
+Interstellar
+Inception
+The Dark Knight
+```
+
+We find users with similar preferences.
+
+```text
+User B
+User C
+User D
+```
+
+Then:
+
+```text
+Users B, C, D liked
+"The Prestige"
+```
+
+Therefore:
+
+> Recommend **The Prestige** to User A.
+
+This is based on the fundamental idea of:
+
+> **Similarity between users or items.**
+
+---
+
+# 18. Future & Cutting-Edge Improvements
+
+Modern similarity systems improve basic KNN using:
+
+### 🔹 Learned Embeddings
+
+Instead of comparing raw data:
+
+```text
+Image Pixels
+```
+
+convert data into:
+
+```text
+Vector Embeddings
+```
+
+Then find nearest neighbors.
+
+---
+
+### 🔹 Vector Databases
+
+Modern AI applications store embeddings and perform similarity search.
+
+This is central to many:
+
+- RAG systems
+- Semantic search systems
+- Recommendation engines
+- AI assistants
+
+---
+
+### 🔹 Approximate Nearest Neighbor Search
+
+Large datasets require faster similarity search techniques.
+
+The core KNN idea evolves into:
+
+```text
+Embedding
+      ↓
+Vector Index
+      ↓
+Nearest Neighbor Search
+      ↓
+Relevant Results
+```
+
+This is a direct conceptual bridge from **classical KNN** to **modern AI retrieval systems**.
+
+---
+
+# 19. Hands-On Portfolio Projects
+
+## 🟢 Beginner Project
+
+### Iris Flower Classifier
+
+Build:
+
+```text
+Flower Measurements
+        ↓
+      Scaling
+        ↓
+       KNN
+        ↓
+Flower Species Prediction
+```
+
+Skills:
+
+- Data preprocessing
+- Scaling
+- Classification
+- K selection
+- Evaluation
+
+---
+
+## 🟡 Intermediate Project
+
+### Student Performance Predictor
+
+Features:
+
+```text
+Study Hours
+Attendance
+Previous Marks
+Assignments
+Sleep Hours
+```
+
+Predict:
+
+```text
+Pass / Fail
+```
+
+Compare:
+
+```text
+KNN
+vs
+Logistic Regression
+```
+
+This comparison makes a strong portfolio project.
+
+---
+
+## 🔴 Advanced Project — Semantic Search System 🔥
+
+Build:
+
+```text
+Documents
+     ↓
+Embedding Model
+     ↓
+Vector Representation
+     ↓
+Nearest Neighbor Search
+     ↓
+Most Relevant Documents
+```
+
+Tech Stack:
+
+```text
+Python
+Sentence Embeddings
+FAISS / Vector Database
+FastAPI
+React
+Docker
+```
+
+This connects your classical ML learning directly to **modern AI engineering**.
+
+---
+
+# 20. Explain to an Interviewer — 60-Second Script 🎤
+
+> K-Nearest Neighbors is a supervised, non-parametric, instance-based machine learning algorithm. Instead of learning explicit model parameters during training, it stores the training examples and makes predictions based on the nearest neighbors of a new data point. For classification, it usually uses majority voting, while for regression it can average the values of neighboring points. The definition of similarity depends on a distance metric such as Euclidean or Manhattan distance. Choosing K is important because a small K can overfit to noise, while a large K can underfit. KNN is also highly sensitive to feature scaling and can suffer from the curse of dimensionality, making it less suitable for very high-dimensional or extremely large datasets.
+
+---
+
+# 21. Top 3 Interview Questions 🎯
+
+## Q1. Why is KNN called a lazy learner?
+
+**Answer:**
+
+> KNN is called a lazy learner because it performs little or no explicit model training. It mainly stores the training data and postpones most computation until prediction time.
+
+---
+
+## Q2. Why is feature scaling important in KNN?
+
+**Answer:**
+
+> KNN relies on distance calculations. If one feature has a much larger numerical range than another, it can dominate the distance calculation and unfairly influence the prediction.
+
+---
+
+## Q3. What happens when K is too small or too large?
+
+**Answer:**
+
+> A small K makes the model sensitive to local noise and can cause overfitting, while a large K creates smoother decision boundaries but may underfit by ignoring important local patterns.
+
+---
+
+# 🧠 DAY 15 MASTER MINDMAP
+
+```text
+                  KNN
+                   │
+                   ↓
+            Store Training Data
+                   │
+                   ↓
+           New Data Point Arrives
+                   │
+                   ↓
+          Calculate Distances
+                   │
+                   ↓
+           Find K Neighbors
+                   │
+          ┌────────┴────────┐
+          ↓                 ↓
+    Classification       Regression
+          ↓                 ↓
+    Majority Vote        Average Value
+
+
+IMPORTANT:
+K → Bias / Variance Trade-off
+Distance → Euclidean / Manhattan
+Scaling → Extremely Important
+High Dimensions → Curse of Dimensionality
+```
+
+---
+
+# 🧪 DAY 15 PRACTICAL ASSIGNMENT
+
+### Challenge 1 🟢
+Build an **Iris Flower Classifier** using KNN.
+
+Try:
+
+```text
+K = 3
+K = 5
+K = 7
+```
+
+Compare the results.
+
+---
+
+### Challenge 2 🟡
+Compare:
+
+```text
+Logistic Regression
+        vs
+KNN
+```
+
+Answer:
+
+- Which performs better?
+- Which trains faster?
+- Which predicts faster?
+- Which is more interpretable?
+
+---
+
+### Challenge 3 🔥
+
+Modify the KNN-from-scratch code to support:
+
+> **Weighted voting based on distance**
+
+Think about:
+
+```text
+Closer Neighbor
+      ↓
+Higher Voting Weight
+```
+
+---
+
+# 📚 AI/ML ENGINEER — LEARNING TRACKER
+
+| Day | Topic | Status |
+|---|---|---|
+| 1–10 | Foundations: Python, Math, Statistics, Optimization | ✅ |
+| 11 | Machine Learning Foundations + Workflow | ✅ |
+| 12 | Linear Regression | ✅ |
+| 13 | Logistic Regression | ✅ |
+| 14 | Classification Metrics & Model Evaluation | ✅ |
+| **15** | **K-Nearest Neighbors (KNN)** | **🔥 TODAY** |
+
+---
+
+# 🔜 DAY 16 — **Naive Bayes**
+
+Next, you'll master:
+
+- Bayes' Theorem revision
+- Conditional probability
+- Bayes classifier
+- Gaussian Naive Bayes
+- Multinomial Naive Bayes
+- Bernoulli Naive Bayes
+- Why the “Naive” assumption works surprisingly well
+- Spam classification
+- Practical implementation with Python
+- Interview questions and production use cases
+
+### 🎯 Today's key takeaway:
+
+\[
+\boxed{
+\text{KNN predicts by looking at similar examples nearby.}
+}
+\]
+
+🔥 **Day 15 complete. Next “Today's Learning” continues with Day 16: Naive Bayes.**
