@@ -1,0 +1,499 @@
+🚀 AI/ML ENGINEER — DAY 24/120
+Gaussian Mixture Models (GMM)
+Day 23 completed
+Today's topic
+Unsupervised Learning
+
+Yesterday, we learned Hierarchical Clustering, where data points are grouped based on their distances and linkage.
+
+Today, we're learning something more powerful: Gaussian Mixture Models (GMM).
+
+The key idea: Instead of saying, "This data point belongs to Cluster 1," GMM can say, "There is an 85% probability that this point belongs to Cluster 1 and a 15% probability that it belongs to Cluster 2."
+
+1. Executive Summary — What is GMM?
+Gaussian Mixture Model (GMM) is a probabilistic clustering algorithm that assumes data is generated from a mixture of several Gaussian distributions.
+
+It identifies clusters by learning the statistical distribution of the data rather than simply measuring distance from a cluster centre.
+ELI5: Understand with an example
+Imagine a college with 1,000 students.
+
+You want to group students based on their:
+- Study hours
+- Academic performance
+With K-Means, a student is assigned to one cluster.
+
+With GMM, the algorithm might estimate:
+- 80% probability: Consistent students
+- 20% probability: Average students
+This is called soft clustering.
+
+
+
+
+
+
+
+
+tmramalho.github.io
+
+
+2. Core concepts
+A. What is a Gaussian distribution?
+A Gaussian distribution is also called a normal distribution.
+
+It is a bell-shaped probability distribution where most values are concentrated around the mean.
+
+
+
+
+
+
+
+
+x.com
+
+
+Its mathematical formula is:
+\[
+f(x)=\frac{1}{\sigma\sqrt{2\pi}}
+e^{-\frac{(x-\mu)^2}{2\sigma^2}}
+\]
+
+Where:
+- \(\mu\) = Mean (centre of distribution)
+- \(\sigma\) = Standard deviation
+- \(\sigma^2\) = Variance
+Example: If students' marks follow a normal distribution, most students may score near 70, while fewer students score extremely high or low.
+B. What is a Gaussian Mixture?
+A Gaussian Mixture combines multiple Gaussian distributions to represent a complex dataset.
+
+For example, student performance might contain three overlapping groups:
+- High performers
+- Average performers
+- Students needing improvement
+Each group is represented by a Gaussian distribution.
+
+The overall probability distribution is:
+\[
+p(x)=\sum_{k=1}^{K}\pi_k
+\mathcal{N}(x\mid\mu_k,\Sigma_k)
+\]
+
+Understand each term:
+Symbol	Meaning
+\(K\)	Number of Gaussian components
+\(\pi_k\)	Mixing coefficient / component weight
+\(\mu_k\)	Mean vector
+\(\Sigma_k\)	Covariance matrix
+\(\mathcal{N}\)	Gaussian distribution
+
+Important condition:
+\[
+\sum_{k=1}^{K}\pi_k=1
+\]
+
+Each mixing coefficient represents the proportion of the overall distribution associated with that component.
+C. What is a covariance matrix?
+Covariance tells us how two features vary together.
+
+In GMM, the covariance matrix helps describe the shape, orientation and spread of a cluster.
+
+
+
+
+
+
+
+
+tools4ds.github.io
+
+
+For two features, a covariance matrix looks like:
+\[
+\Sigma=
+\begin{bmatrix}
+\sigma_x^2 & \sigma_{xy}\\
+\sigma_{xy} & \sigma_y^2
+\end{bmatrix}
+\]
+
+This allows GMM to model elliptical clusters, including clusters that are rotated or stretched.
+3. Hard clustering vs Soft clustering
+This is one of the most important differences to remember.
+
+
+
+
+
+
+
+
+
+
+K-Means
+- Hard assignment
+- One cluster per point
+- Distance-based assignment
+
+
+
+
+
+
+
+
+
+
+
+GMM
+- Soft assignment
+- Probability per cluster
+- Distribution-based assignment
+
+
+Suppose a customer has the following probabilities:
+Cluster	Probability
+Premium customer	0.75
+Regular customer	0.20
+Occasional customer	0.05
+
+GMM can represent this uncertainty instead of forcing an absolute assignment.
+4. How GMM works — Expectation-Maximization (EM)
+This is the heart of GMM.
+
+GMM commonly uses an algorithm called Expectation-Maximization (EM) to estimate the Gaussian distributions.
+
+
+
+
+
+
+
+
+dsworld.org
+
+
+There are two major steps.
+Step 1: Initialize
+Choose the number of Gaussian components \(K\).
+
+Initialize:
+- Means
+- Covariance matrices
+- Mixing coefficients
+The initial estimates can affect the final result.
+Step 2: E-Step — Expectation
+Calculate the probability that each data point belongs to each Gaussian component.
+
+These probabilities are called responsibilities.
+
+For data point \(x_i\):
+\[
+\gamma_{ik}=
+\frac{\pi_k\mathcal{N}(x_i\mid\mu_k,\Sigma_k)}
+{\sum_{j=1}^{K}\pi_j\mathcal{N}(x_i\mid\mu_j,\Sigma_j)}
+\]
+
+Example:
+
+A customer may have:
+- Cluster 1: 0.80
+- Cluster 2: 0.15
+- Cluster 3: 0.05
+The probabilities add up to 1.
+Step 3: M-Step — Maximization
+Update the Gaussian parameters using the calculated responsibilities.
+
+Update the mean:
+\[
+\mu_k=
+\frac{\sum_i\gamma_{ik}x_i}
+{\sum_i\gamma_{ik}}
+\]
+
+Update the mixing coefficient:
+\[
+\pi_k=\frac{\sum_i\gamma_{ik}}{N}
+\]
+
+Update the covariance:
+\[
+\Sigma_k=
+\frac{\sum_i\gamma_{ik}
+(x_i-\mu_k)(x_i-\mu_k)^T}
+{\sum_i\gamma_{ik}}
+\]
+
+In simple words, the algorithm updates each cluster based on how strongly every point belongs to it.
+Step 4: Repeat
+Repeat E-Step and M-Step until the model converges.
+
+The algorithm generally seeks to increase the data log-likelihood at each iteration, but it can converge to a local optimum rather than the global best solution.
+Remember EM
+1. Initialize Gaussian distributions.
+2. E-Step: Calculate membership probabilities.
+3. M-Step: Update means, covariances and weights.
+4. Repeat until convergence.
+
+5. GMM vs K-Means
+Feature	K-Means	GMM
+Approach	Distance-based	Probability-based
+Assignment	Hard	Soft
+Cluster shape	Typically spherical around centroids	Can be elliptical
+Output	Cluster label	Probabilities and labels
+Main algorithm	Lloyd's algorithm	EM
+Complexity	Usually simpler	More computationally expensive
+Uncertainty	Not directly represented	Explicitly represented
+
+When should you use GMM?
+
+Use GMM when:
+- Clusters overlap.
+- You need probability-based membership.
+- Clusters have different shapes and orientations.
+- You want to model the underlying data distribution.
+6. Selecting the number of clusters — AIC and BIC
+How do we decide whether to use 2, 3 or 5 Gaussian components?
+
+Two important model-selection metrics are:
+
+AIC — Akaike Information Criterion
+
+BIC — Bayesian Information Criterion
+
+Both balance model fit and model complexity.
+\[
+AIC=2p-2\ln(L)
+\]
+
+\[
+BIC=p\ln(N)-2\ln(L)
+\]
+
+Where:
+- \(p\) = Number of estimated parameters
+- \(N\) = Number of observations
+- \(L\) = Maximum likelihood
+Rule: Lower AIC or BIC is generally preferred.
+
+Do not simply choose the largest number of clusters because it can fit training data better. Compare model quality and complexity.
+7. Hands-on practical — GMM using Python
+Let's implement GMM using Scikit-learn.
+
+Step 1: Install libraries
+pip install numpy pandas matplotlib scikit-learn
+
+
+Step 2: Generate a synthetic dataset
+import numpy as npimport matplotlib.pyplot as pltfrom sklearn.datasets import make_blobsfrom sklearn.preprocessing import StandardScalerfrom sklearn.mixture import GaussianMixtureX, y = make_blobs(    n_samples=500,    centers=3,    cluster_std=[1.5, 1.0, 2.0],    random_state=42)scaler = StandardScaler()X_scaled = scaler.fit_transform(X)
+
+
+
+Step 3: Train the GMM model
+gmm = GaussianMixture(    n_components=3,    covariance_type="full",    n_init=5,    random_state=42)gmm.fit(X_scaled)labels = gmm.predict(X_scaled)probabilities = gmm.predict_proba(X_scaled)print("Cluster labels:")print(labels[:10])print("\nMembership probabilities:")print(probabilities[:5])
+
+
+
+Step 4: Visualize clusters
+plt.scatter(    X_scaled[:, 0],    X_scaled[:, 1],    c=labels,    cmap="viridis")plt.title("Gaussian Mixture Model")plt.xlabel("Feature 1")plt.ylabel("Feature 2")plt.show()
+
+
+
+Step 5: Evaluate the model
+print("Log Likelihood:", gmm.score(X_scaled))print("AIC:", gmm.aic(X_scaled))print("BIC:", gmm.bic(X_scaled))
+
+
+
+Important parameters
+Parameter	Purpose
+n_components	Number of Gaussian distributions
+covariance_type	Cluster covariance structure
+n_init	Number of initializations
+reg_covar	Small regularization added to covariance diagonal
+random_state	Reproducibility
+
+Four covariance types:
+- full: Each component has its own full covariance matrix.
+- tied: All components share one full covariance matrix.
+- diag: Each component has its own diagonal covariance matrix.
+- spherical: Each component has one variance value.
+Important: predict_proba() returns soft membership probabilities, while predict() returns the most likely component label.
+8. Real-world applications
+
+
+
+
+
+
+
+
+
+
+1. Customer segmentation
+
+Identify different customer behaviour patterns and estimate how strongly each customer fits each group.
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. Speech recognition
+
+Gaussian mixture models have historically been used to model acoustic feature distributions in speech systems.
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. Anomaly detection
+
+Estimate how likely a data point is under the learned distribution. Unusually low likelihood can indicate an anomaly.
+
+
+
+
+
+
+
+
+
+
+
+
+
+4. Medical imaging
+
+Model distributions of image intensities and support image segmentation workflows.
+
+
+
+9. Limitations and troubleshooting
+1. Local optimum: Different initializations can produce different results. Use n_init.
+2. Too many components: May overfit the data. Compare AIC and BIC.
+3. Singular covariance: Covariance matrices may become numerically unstable. Use reg_covar.
+4. Non-Gaussian data: GMM may not represent arbitrary cluster shapes well.
+5. High-dimensional data: Estimating full covariance matrices can become expensive.
+6. Small datasets: Too few observations can lead to unreliable estimates.
+Advanced improvement
+GMM can be extended with Bayesian Gaussian Mixture Models, which use Bayesian inference and can reduce the need to manually fix the effective number of components.
+10. Interview preparation
+Your 60-second interview answer
+
+"Gaussian Mixture Model is an unsupervised probabilistic clustering algorithm. It assumes that data is generated from a combination of multiple Gaussian distributions. Unlike K-Means, which assigns each point to exactly one cluster, GMM performs soft clustering by calculating membership probabilities. It generally uses the Expectation-Maximization algorithm. In the E-Step, it calculates responsibilities, and in the M-Step, it updates the means, covariance matrices and mixing coefficients. GMM is useful for overlapping and elliptical clusters, density estimation and anomaly detection."
+
+Top interview questions
+Q1. Why is GMM called a probabilistic clustering algorithm?
+
+Because it calculates the probability of a data point belonging to each Gaussian component.
+
+Q2. What is the difference between E-Step and M-Step?
+- E-Step calculates responsibilities.
+- M-Step updates model parameters using those responsibilities.
+Q3. Why is GMM more flexible than K-Means?
+
+GMM models cluster shape and orientation through covariance matrices and provides probabilistic membership rather than only hard assignments.
+11. Today's practical assignment
+Pending — complete independently
+Build a comparison between K-Means and GMM.
+1. Generate a dataset with overlapping clusters.
+2. Train K-Means with 3 clusters.
+3. Train GMM with 3 components.
+4. Visualize both results.
+5. Print GMM membership probabilities for 10 points.
+6. Compare AIC and BIC for component counts from 1 to 6.
+7. Write five observations about the differences.
+Challenge question: Find a data point that has significant membership probability in two different GMM components. Explain why K-Means cannot express that uncertainty in the same way.
+12. Day 24 mindmap
+
+
+
+
+
+
+
+
+soyakim.medium.com
+
+
+13. Quick knowledge check
+Day 24 quiz
+0/4 answered
+
+1. What type of clustering does GMM perform?
+
+Hard clustering
+
+Soft clustering
+
+Rule-based clustering
+
+
+
+
+2. What happens in the E-Step?
+
+Update covariance only
+
+Calculate responsibilities
+
+Delete outliers
+
+
+
+
+3. Which algorithm is commonly used to train GMM?
+
+KNN
+
+EM
+
+DFS
+
+
+
+
+4. Which criterion generally prefers a lower value?
+
+AIC and BIC
+
+Number of samples
+
+Training accuracy
+
+
+
+Submit answers
+
+Your AI/ML progress tracker
+24 of 120 days
+20%
+
+
+
+Day	Topic	Status
+21	K-Means Clustering	Complete
+22	DBSCAN	Complete
+23	Hierarchical Clustering	Complete
+24	Gaussian Mixture Models	Lesson covered
+
+Tomorrow — Day 25: Dimensionality Reduction: t-SNE and UMAP, with practical visualization of high-dimensional datasets.
+
+Today's takeaway: K-Means asks, "Which cluster is closest?" GMM asks, "How likely is this point to belong to each cluster?"
+
+Keep following the process: Concept → Mathematics → Implementation → Experiment → Debug → Project → Interview.
