@@ -1,0 +1,655 @@
+# **🚀 AI/ML ENGINEER — DAY 25/120**
+
+## **Dimensionality Reduction: t-SNE & UMAP**
+
+Yesterday, we learned **Gaussian Mixture Models (GMM)** and how probabilistic clustering can identify overlapping clusters.
+
+Today, we're moving into an important topic in machine learning: **Dimensionality Reduction and Visualization**.
+
+Imagine you have a dataset with 100 features. You cannot easily visualize it on a 2D graph. Dimensionality reduction helps transform high-dimensional data into a lower-dimensional representation while preserving important patterns.
+
+Today's focus:
+
+- Why dimensionality reduction is needed
+- t-SNE
+- UMAP
+- How they work intuitively
+- Python implementation
+- Comparing PCA, t-SNE and UMAP
+- Applications in AI/ML
+
+# **1. Executive Summary — What is Dimensionality Reduction?**
+
+**Dimensionality reduction** is the process of reducing the number of features in a dataset while attempting to preserve the important information.
+
+Suppose a dataset contains information about customers:
+
+- Age
+- Income
+- Spending score
+- Purchase frequency
+- Website visits
+- Product preferences
+- Location
+- 100 additional features
+
+We have 108 dimensions. Visualizing or analyzing this directly becomes difficult.
+
+Dimensionality reduction may transform these 108 features into just 2 or 3 dimensions.
+
+**High-dimensional data**
+
+100+ features
+
+**Reduced data**
+
+2 or 3 dimensions
+
+### **Why do we need it?**
+
+1. **Visualization** — visualize complex data in 2D or 3D.
+2. **Noise reduction** — remove less useful information.
+3. **Computational efficiency** — reduce training time.
+4. **Feature compression** — represent data using fewer variables.
+5. **Pattern discovery** — identify hidden clusters and structures.
+6. **Avoid the curse of dimensionality** — high-dimensional spaces can make distance-based methods less effective.
+
+# **2. The Curse of Dimensionality**
+
+As the number of dimensions increases, the data space becomes increasingly sparse.
+
+Consider:
+
+- 2 dimensions → relatively easy to visualize.
+- 10 dimensions → difficult to visualize.
+- 100 dimensions → extremely sparse space.
+- 1,000 dimensions → many algorithms face computational and statistical challenges.
+
+For example, in a high-dimensional dataset, two points that appear similar may actually be far apart when all dimensions are considered.
+
+This can negatively affect:
+
+- KNN
+- K-Means
+- Clustering
+- Distance-based classification
+- Density estimation
+
+Dimensionality reduction can help, but **reducing dimensions does not automatically improve a model**. Information may be lost.
+
+# **3. The Three Important Dimensionality Reduction Techniques**
+
+Today, understand these three:
+
+| Technique | Main purpose                                       | Type      |
+| --------- | -------------------------------------------------- | --------- |
+| PCA       | Preserve global variance                           | Linear    |
+| t-SNE     | Visualize local similarities                       | Nonlinear |
+| UMAP      | Preserve local structure and some global structure | Nonlinear |
+
+We already learned PCA on Day 8.
+
+Today, we'll focus on **t-SNE and UMAP**.
+
+# **4. t-SNE — t-Distributed Stochastic Neighbor Embedding**
+
+## **What is t-SNE?**
+
+**t-SNE is a nonlinear dimensionality reduction algorithm primarily used for visualizing high-dimensional data in 2D or 3D.**
+
+Its main goal is:
+
+> Points that are similar in high-dimensional space should remain close together in the lower-dimensional visualization.
+
+It is especially useful for exploring:
+
+- Image embeddings
+- Text embeddings
+- Biological datasets
+- Customer data
+- Deep learning representations
+
+[t-SNE | RoboSathi](https://images.openai.com/static-rsc-4/TXhupKOWeHBhmkLRNmVf86FfUlpZUVavGZInnv1wMiPJqMMBVIKB3g9XSc-YSfTnrIkLn5YZS6AFI-fSQH0lWnh12rI2WZGBL30whhjO2k-eBL-xC9VolWs5swT6WHr6Z9VpsPbocVun3POONVgDE16QQHqHrQT_qXu0n3nVc6I?purpose=inline)
+
+[Triplet Loss — Deep Learning](https://images.openai.com/static-rsc-4/xMwaJRA4hl0IdYMeGPOMZQkBiRqIANsucs3jZQsjNa1-E4y_atFeGovVSRStm62Ks5nTiia70gXrK4DO0_hnwpmONU0QIvGlIuotjm4hzKsrV7rBcjDaGODTQ50wGEdIP5QLs6vDPxGCrujE_XpwfW67sHWOrSfE9p09UyHUncU?purpose=inline)
+
+[GitHub - dganguli/deeplearning · GitHub](https://images.openai.com/static-rsc-4/JIQFtDTJBr3JN0VEjFd52eAIJTai-n-d-SXTZB4o1P2O4RjrpNtYJW9uciMkrc8YkjXVzfVwTPU3hd34pAyHZA1kGCxwi1_SDXHf9RjdM_Ow4GxkfARxNyLlnTlDPF7vOhOXP10GfKdmq6NlXZYF8_ZT9v5zgNfFfBdB8Btb3YA?purpose=inline)
+
+6
+
+## **ELI5 intuition**
+
+Imagine 100 students standing in a huge room.
+
+Students who have similar interests should stand near one another.
+
+t-SNE tries to arrange these students on a small 2D map so that similar students remain close.
+
+The original room might have hundreds of characteristics:
+
+- Interests
+- Academic scores
+- Skills
+- Personality measurements
+
+The final map only has:
+
+- X-axis
+- Y-axis
+
+But the map attempts to preserve similarity.
+
+## **How t-SNE works**
+
+### **Step 1: Calculate similarities in high-dimensional space**
+
+t-SNE measures how similar data points are to one another.
+
+Nearby points receive higher similarity probabilities.
+
+### **Step 2: Create a probability distribution**
+
+It converts distances into probabilities.
+
+Points close to one another have a higher probability of being considered neighbors.
+
+### **Step 3: Create low-dimensional representations**
+
+The algorithm places the points in 2D or 3D.
+
+### **Step 4: Calculate similarities again**
+
+It calculates similarities between points in the reduced space.
+
+### **Step 5: Minimize the difference**
+
+t-SNE tries to minimize the difference between the original similarity distribution and the reduced-space similarity distribution.
+
+It uses a divergence measure called **KL Divergence**.
+
+\\[ KL(P\\|Q)=\sum\_{i,j}p\_{ij} \log\frac{p\_{ij}}{q\_{ij}} \\]
+
+Where:
+
+- \\(P\\) = similarities in the original space
+- \\(Q\\) = similarities in the reduced space
+
+The optimization tries to make the low-dimensional representation preserve important neighborhood relationships.
+
+### **Why does t-SNE use a Student's t-distribution?**
+
+In the low-dimensional space, t-SNE uses a Student's t-distribution.
+
+This distribution has heavier tails than a Gaussian distribution.
+
+It helps prevent the **crowding problem**, where many points become compressed together in a low-dimensional space.
+
+# **5. Important t-SNE parameter — Perplexity**
+
+The most important parameter beginners should understand is:
+
+```
+perplexity
+```
+
+Perplexity approximately controls the number of effective neighbors considered when constructing the high-dimensional similarity distribution.
+
+Think of it as adjusting the size of the neighborhood that t-SNE pays attention to.
+
+### **Lower perplexity**
+
+- Focuses on smaller neighborhoods.
+- May reveal smaller local clusters.
+- Can produce fragmented visualizations.
+
+### **Higher perplexity**
+
+- Considers larger neighborhoods.
+- May produce broader structures.
+- Can merge smaller local patterns.
+
+Example:
+
+```
+TSNE(    n_components=2,    perplexity=30)
+```
+
+The best perplexity depends on dataset size and structure. It is not a universally correct value.
+
+# **6. UMAP — Uniform Manifold Approximation and Projection**
+
+## **What is UMAP?**
+
+**UMAP is a nonlinear dimensionality reduction algorithm that uses manifold learning and graph-based methods to represent high-dimensional data in a lower-dimensional space.**
+
+It is widely used for:
+
+- Visualization
+- Embedding exploration
+- Biological data
+- NLP embeddings
+- Image representations
+- Large datasets
+
+[GAN-Based Anomaly Detection Tailored for Classifiers](https://images.openai.com/static-rsc-4/iLv08LAlwQdYgesG-SKgupRJ-naFnyCBcElxiZ4cZEEtRLvI4QKr4S8oy7sSPwzI86vCWWmAq8WXp-JqYVHsVOD-BFxA0kOlLuWdve8gwz1jSqZxtJOY8ClhM2tsaNQGq7GW2h97zrGoWs6HIbcGKFIRsWqDeNck6UV6YInXwQs?purpose=inline)
+
+[Recursive Embedding and Clustering | Spotify Engineering](https://images.openai.com/static-rsc-4/I-8P-AUlFq6rEzY-Goi86e6EQ3MdT5W961kKgpe7tm0_nXSa3wR11vUWSEzVcQy6bL4SzjnN1vGkxaHsUCyVVtu46ErQ8NRB2kcxha3vmpkiurY8X_tDhi94uM5l5gp7oKJ_Y4dHvsJpjGOVopnc8-x4OuO9ZHIq7St9RivZJ1k?purpose=inline)
+
+[Tutorial 2: SpaCon for layer6 CT neuron subtype classification — SpaCon_tutorials 1.0 documentation](https://images.openai.com/static-rsc-4/poS9lRui9RgcGrvUoouY-D7iv5U8b0kXYqyQuJsid2iQoyse8SklplW3hoONzQI9Ha6t9686Pxe3IAiBSQgOZpqDwwgfl6sYMhXYgflG6LkvoxJPYzIh-rlA-NrNw4l5egcW9yRliOc2nC1b0mgd50kJUh8_rWlJksnpz9bUakY?purpose=inline)
+
+7
+
+## **ELI5 intuition**
+
+Imagine a crumpled sheet of paper.
+
+Although the paper appears complicated in 3D, it is fundamentally a 2D surface.
+
+UMAP tries to understand the underlying structure of data and create a simpler representation.
+
+It uses a concept called **manifold learning**.
+
+### **What is a manifold?**
+
+A manifold is a lower-dimensional structure that may exist inside a higher-dimensional space.
+
+For example:
+
+A 3D object may have an underlying 2D surface.
+
+Similarly, a dataset containing 100 features may contain patterns that can be represented meaningfully using fewer dimensions.
+
+# **7. How UMAP works**
+
+UMAP's process can be simplified into four stages.
+
+### **Step 1 — Find nearest neighbors**
+
+For each data point, find its nearest neighbors.
+
+### **Step 2 — Build a graph**
+
+Create a graph representing relationships between neighboring points.
+
+Each point becomes a node.
+
+Relationships between similar points become edges.
+
+### **Step 3 — Learn the low-dimensional representation**
+
+UMAP constructs a lower-dimensional graph.
+
+### **Step 4 — Optimize the layout**
+
+It attempts to preserve important relationships between the original graph and the reduced graph.
+
+The result is a visualization where nearby points generally represent similar observations.
+
+# **8. t-SNE vs UMAP**
+
+| Feature             | t-SNE                | UMAP                                          |
+| ------------------- | -------------------- | --------------------------------------------- |
+| Primary purpose     | Visualization        | Visualization + representation                |
+| Nonlinear           | Yes                  | Yes                                           |
+| Local structure     | Excellent            | Excellent                                     |
+| Global structure    | Often less reliable  | Often better preserved, though not guaranteed |
+| Speed               | Can be expensive     | Often faster                                  |
+| Large datasets      | Can become expensive | Generally more scalable                       |
+| Important parameter | Perplexity           | `n_neighbors`                                 |
+| Another parameter   | Learning rate        | `min_dist`                                    |
+| Output              | 2D/3D embeddings     | 2D/3D embeddings                              |
+
+### **UMAP parameters**
+
+`n_neighbors`
+
+Controls how much local versus broader structure is considered.
+
+Smaller values → more local structure.
+
+Larger values → broader neighborhood structure.
+
+`min_dist`
+
+Controls how tightly points may be packed together in the embedding.
+
+Smaller values → tighter clusters.
+
+Larger values → more spread-out representations.
+
+**Important:** A visualization that appears to have clearly separated clusters does not prove that the original dataset contains truly separated clusters.
+
+# **9. Hands-on implementation**
+
+We will use the Iris dataset.
+
+It contains:
+
+- 150 samples
+- 4 features
+- 3 flower classes
+
+We will reduce the data from 4 dimensions to 2.
+
+## **Step 1 — Install libraries**
+
+```
+pip install numpy pandas matplotlib scikit-learn umap-learn
+```
+
+## **Step 2 — Load the dataset**
+
+```
+import numpy as npimport pandas as pdimport matplotlib.pyplot as pltfrom sklearn.datasets import load_irisfrom sklearn.preprocessing import StandardScaleriris = load_iris()X = iris.datay = iris.targetprint("Shape:", X.shape)
+```
+
+Expected output:
+
+```
+Shape: (150, 4)
+```
+
+We have:
+
+\\[ 150 \text{ samples}\times4 \text{ features} \\]
+
+## **Step 3 — Standardize the data**
+
+```
+scaler = StandardScaler()X_scaled = scaler.fit_transform(X)
+```
+
+Why standardize?
+
+Our features may have different scales.
+
+For example:
+
+- Sepal length
+- Sepal width
+- Petal length
+- Petal width
+
+Distance-based methods can be affected when features have very different scales.
+
+# **10. Implement t-SNE**
+
+```
+from sklearn.manifold import TSNEtsne = TSNE(    n_components=2,    perplexity=30,    learning_rate="auto",    init="pca",    random_state=42)X_tsne = tsne.fit_transform(X_scaled)print(X_tsne.shape)
+```
+
+Expected output:
+
+```
+(150, 2)
+```
+
+We transformed:
+
+\\[ 4D\rightarrow2D \\]
+
+### **Visualization**
+
+```
+plt.figure(figsize=(8, 6))plt.scatter(    X_tsne[:, 0],    X_tsne[:, 1],    c=y,    cmap="viridis",    s=50)plt.title("t-SNE Visualization of Iris Dataset")plt.xlabel("Dimension 1")plt.ylabel("Dimension 2")plt.show()
+```
+
+# **11. Implement UMAP**
+
+```
+import umapumap_model = umap.UMAP(    n_components=2,    n_neighbors=15,    min_dist=0.1,    random_state=42)X_umap = umap_model.fit_transform(X_scaled)print(X_umap.shape)
+```
+
+### **Visualization**
+
+```
+plt.figure(figsize=(8, 6))plt.scatter(    X_umap[:, 0],    X_umap[:, 1],    c=y,    cmap="viridis",    s=50)plt.title("UMAP Visualization of Iris Dataset")plt.xlabel("Dimension 1")plt.ylabel("Dimension 2")plt.show()
+```
+
+# **12. PCA vs t-SNE vs UMAP — When should you use each?**
+
+This is an important practical and interview question.
+
+| Situation                                          | Recommended technique              |
+| -------------------------------------------------- | ---------------------------------- |
+| Reduce dimensions while preserving linear variance | PCA                                |
+| Visualize complex high-dimensional data            | t-SNE                              |
+| Visualize large datasets efficiently               | UMAP                               |
+| Compress features for a downstream ML model        | PCA or other appropriate reduction |
+| Explore clusters in embeddings                     | UMAP / t-SNE                       |
+| Preserve interpretable linear combinations         | PCA                                |
+
+### **Important technical distinction**
+
+**PCA is a linear transformation.**
+
+It creates new features using linear combinations of original features.
+
+**t-SNE and UMAP are nonlinear embedding methods.**
+
+They create representations intended to preserve neighborhood relationships.
+
+Don't automatically use t-SNE or UMAP as preprocessing before every ML model. Their embeddings can be sensitive to parameters and may not preserve the information needed for a predictive task.
+
+# **13. Real-world AI/ML applications**
+
+### **Computer Vision**
+
+Image embeddings may contain hundreds or thousands of dimensions.
+
+UMAP or t-SNE can help visualize:
+
+- Similar images
+- Image classes
+- Misclassified samples
+- Hidden patterns in image datasets
+
+### **Natural Language Processing**
+
+Text embeddings can represent sentences or documents in hundreds of dimensions.
+
+Dimensionality reduction can help explore:
+
+- Similar documents
+- Topic clusters
+- Semantic relationships
+- Customer feedback
+
+### **Healthcare**
+
+Researchers can visualize:
+
+- Patient groups
+- Gene expression patterns
+- Disease subtypes
+- Medical image representations
+
+### **Fraud detection**
+
+Visualize transaction embeddings and investigate unusual regions or isolated observations.
+
+### **Recommendation systems**
+
+Explore user or item embeddings and discover similarity patterns.
+
+# **14. Limitations and common mistakes**
+
+## **t-SNE limitations**
+
+1. Can be computationally expensive.
+2. Results can change with initialization and parameters.
+3. Cluster sizes and distances between clusters may be misleading.
+4. It is primarily a visualization technique.
+5. Different runs may produce different-looking maps.
+
+## **UMAP limitations**
+
+1. Results depend on `n_neighbors` and `min_dist`.
+2. It can distort some global relationships.
+3. Visualization does not establish that clusters are real.
+4. Parameter selection requires experimentation.
+5. Interpretation of embedding axes is generally not meaningful.
+
+### **Common ML mistake**
+
+Suppose t-SNE shows three separate clusters.
+
+You cannot automatically conclude:
+
+> "The dataset contains exactly three real clusters."
+
+The visualization may be influenced by the algorithm's optimization and parameters.
+
+Use domain knowledge, original-space analysis, clustering metrics, and validation before drawing conclusions.
+
+# **15. Mini-project — Visualizing high-dimensional data**
+
+## **Project objective**
+
+Create a dimensionality-reduction comparison dashboard.
+
+Dataset:
+
+**Iris Dataset**
+
+Implement:
+
+1. Original dataset visualization is impossible directly in 4D.
+2. PCA → 2 dimensions.
+3. t-SNE → 2 dimensions.
+4. UMAP → 2 dimensions.
+5. Visualize all three.
+6. Compare how the three flower classes appear.
+7. Change parameters and observe what happens.
+
+### **Suggested experiment**
+
+| Experiment | Parameter          |
+| ---------- | ------------------ |
+| t-SNE 1    | Perplexity = 5     |
+| t-SNE 2    | Perplexity = 30    |
+| t-SNE 3    | Perplexity = 50    |
+| UMAP 1     | `n_neighbors = 5`  |
+| UMAP 2     | `n_neighbors = 15` |
+| UMAP 3     | `n_neighbors = 50` |
+
+Record:
+
+- Are clusters more separated?
+- Are local groups preserved?
+- Does the overall arrangement change?
+- Which visualization is easiest to interpret?
+
+This experiment is more valuable than simply running one default configuration.
+
+# **16. Interview preparation 🎯**
+
+### **Q1. What is dimensionality reduction?**
+
+Dimensionality reduction is the process of reducing the number of features in a dataset while preserving important information, patterns or relationships.
+
+### **Q2. What is t-SNE?**
+
+t-SNE is a nonlinear dimensionality reduction technique that primarily preserves local similarity relationships to visualize high-dimensional data in 2D or 3D.
+
+### **Q3. What is UMAP?**
+
+UMAP is a nonlinear dimensionality reduction algorithm based on manifold learning and graph construction. It is commonly used for visualizing high-dimensional data and often scales efficiently to larger datasets.
+
+### **Q4. What is the difference between PCA and t-SNE?**
+
+PCA is a linear method that preserves directions of maximum variance. t-SNE is a nonlinear method designed primarily to preserve local neighborhood similarities.
+
+### **Q5. What is the curse of dimensionality?**
+
+As the number of dimensions increases, data becomes increasingly sparse, distances become less informative for many algorithms, and computational and statistical challenges increase.
+
+# **17. Today's knowledge check 🧠**
+
+**Day 25 quiz**
+
+**1. Which technique is linear?**
+
+UMAP
+
+t-SNE
+
+PCA
+
+
+
+**2. What does t-SNE primarily preserve?**
+
+Local similarities
+
+Original feature names
+
+Exact global distances
+
+
+
+**3. Which UMAP parameter controls neighborhood size?**
+
+n_components
+
+n_neighbors
+
+random_state
+
+
+
+**4. What is the main purpose of t-SNE and UMAP?**
+
+Supervised classification
+
+High-dimensional data visualization
+
+Calculate regression coefficients
+
+
+
+**5. Can visual clusters from t-SNE prove the existence of real clusters?**
+
+Yes, always
+
+No, visualization alone is insufficient
+
+Only when perplexity is 30
+
+
+
+Submit answers
+
+# **📚 AI/ML Engineer Progress Tracker**
+
+**Day 25 / 120**\
+**20.8% completed**
+
+| Day    | Topic                                      | Status                |
+| ------ | ------------------------------------------ | --------------------- |
+| 21     | K-Means Clustering                         | ✅                     |
+| 22     | DBSCAN                                     | ✅                     |
+| 23     | Hierarchical Clustering                    | ✅                     |
+| 24     | Gaussian Mixture Models                    | ✅                     |
+| **25** | **Dimensionality Reduction: t-SNE & UMAP** | **📚 Today's lesson** |
+
+## **Tomorrow — Day 26**
+
+**Anomaly Detection**
+
+We will learn:
+
+- What anomaly detection is
+- Normal vs anomalous data
+- Statistical anomaly detection
+- Isolation Forest
+- Local Outlier Factor (LOF)
+- One-Class SVM
+- Practical fraud detection implementation
+- How to evaluate anomaly detection when labels are unavailable
+
+Today's core takeaway:
+
+> **PCA compresses information using linear transformations. t-SNE and UMAP help reveal hidden neighborhood structures in complex, high-dimensional data.**
+
+Keep building your knowledge one day at a time. **25/120 days completed — the foundation is getting stronger.** 💪
