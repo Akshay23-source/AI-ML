@@ -1,0 +1,866 @@
+# 🚀 AI/ML ENGINEER — DAY 26/120
+
+## Anomaly Detection — Finding the Unusual in Data
+
+(25 lessons covered) (Day 26) (Unsupervised ML)
+
+Yesterday, we learned dimensionality reduction using PCA, t-SNE and UMAP. Today, we're moving into a highly practical area of AI/ML: **Anomaly Detection**.
+
+Imagine a bank processes 10 lakh transactions every day. Most transactions are normal, but a few may be fraudulent.
+
+How can an ML system identify unusual transactions when it has never seen those fraud patterns before?
+
+That's the problem anomaly detection tries to solve.
+
+By the end of today's lesson, you'll understand and implement:
+
+1. Statistical anomaly detection
+2. Isolation Forest
+3. Local Outlier Factor (LOF)
+4. One-Class SVM
+5. Fraud detection using Python
+6. How to evaluate anomalies when labels are unavailable
+
+---
+
+# 1. Executive Summary — What is Anomaly Detection?
+
+**Anomaly detection is the process of identifying data points, observations or patterns that differ significantly from normal behaviour.**
+
+An anomaly is also called an outlier in many contexts, although the terms are not always interchangeable.
+
+### ELI5: Understand with a real-world example
+
+Imagine you normally spend ₹200–₹500 per day using your debit card.
+
+Suddenly, a transaction of ₹1,50,000 occurs at an unfamiliar location.
+
+A fraud detection system may flag this transaction because it differs significantly from your usual spending behaviour.
+
+Other examples:
+
+- A server suddenly receives 10 times its normal traffic.
+- A machine starts vibrating unusually in a factory.
+- A student suddenly scores very differently from their historical performance.
+- A network connection shows suspicious traffic patterns.
+
+**Core idea:** Learn what normal behaviour looks like, then identify observations that deviate from it.
+
+---
+
+# 2. Types of anomalies
+
+There are three major types.
+
+## A. Point anomalies
+
+A single observation is significantly different from the rest.
+
+Example: Most bank transactions are below ₹10,000, but one transaction is ₹5,00,000.
+
+## B. Contextual anomalies
+
+An observation is unusual only in a particular context.
+
+Example:
+
+- 35°C may be normal in summer.
+- 35°C may be unusual in winter.
+
+The same value can be normal or abnormal depending on the context.
+
+## C. Collective anomalies
+
+A group or sequence of observations is unusual even when individual observations may appear normal.
+
+Example: A server normally receives requests at a steady rate. A sequence of requests in a suspicious pattern may indicate a cyberattack.
+
+**Remember:**
+
+| Type       | Meaning                       | Example                     |
+| ---------- | ----------------------------- | --------------------------- |
+| Point      | One unusual data point        | Unusually large transaction |
+| Contextual | Unusual in a specific context | High winter temperature     |
+| Collective | Unusual group or sequence     | Suspicious network traffic  |
+
+---
+
+# 3. Different approaches to anomaly detection
+
+Anomaly detection methods can be grouped into three broad categories.
+
+### 1. Supervised anomaly detection
+
+Uses labelled data containing normal and anomalous examples.
+
+Example: A fraud dataset where each transaction is labelled:
+
+- 0 = Normal
+- 1 = Fraud
+
+Algorithms such as Random Forest and Logistic Regression can be trained as classifiers.
+
+### 2. Semi-supervised anomaly detection
+
+Uses data that is mostly or entirely labelled as normal.
+
+The model learns normal behaviour and identifies deviations.
+
+Example: Train a system using normal factory machine readings and flag unusual readings.
+
+### 3. Unsupervised anomaly detection
+
+Uses data without labels.
+
+The algorithm attempts to identify unusual observations based on the structure or distribution of the data.
+
+Examples:
+
+- Isolation Forest
+- Local Outlier Factor
+- One-Class SVM
+
+**Important distinction**
+
+Unsupervised anomaly detection does not automatically know whether an unusual observation is fraudulent, dangerous or incorrect. It only identifies statistical or structural unusualness. Domain knowledge or investigation is needed to determine its meaning.
+
+---
+
+# 4. Statistical anomaly detection — Z-score
+
+Before advanced algorithms, understand the statistical approach.
+
+The **Z-score** tells us how far a value is from the mean in terms of standard deviations.
+
+\\[ Z=\frac{x-\mu}{\sigma} \\]
+
+Where:
+
+- \\(x\\) = Observed value
+- \\(\mu\\) = Mean
+- \\(\sigma\\) = Standard deviation
+
+### Example
+
+Suppose transaction amounts have:
+
+- Mean = ₹1,000
+- Standard deviation = ₹200
+- New transaction = ₹2,000
+
+\\[ Z=\frac{2000-1000}{200}=5 \\]
+
+The transaction is 5 standard deviations above the mean.
+
+A common rule for approximately normal data is:
+
+- \\(|Z|>2\\): Potentially unusual.
+- \\(|Z|>3\\): Stronger indication of an outlier.
+
+These are guidelines, not universal fraud thresholds.
+
+### Python implementation
+
+```
+import numpy as np
+
+data = np.array([900, 1000, 1100, 950, 1050, 3000])
+
+mean = np.mean(data)
+std = np.std(data)
+
+z_scores = (data - mean) / std
+
+for value, z in zip(data, z_scores):
+    if abs(z) > 2:
+        print(value, "Potential anomaly")
+```
+
+### Limitations of Z-score
+
+1. Works best when the distribution is approximately normal.
+2. Sensitive to extreme outliers because mean and standard deviation are affected.
+3. A single threshold may not work for every feature.
+4. Does not automatically account for relationships between multiple features.
+
+**Alternative:** IQR method.
+
+\\[ IQR=Q3-Q1 \\]
+
+Lower bound:
+
+\\[ Q1-1.5(IQR) \\]
+
+Upper bound:
+
+\\[ Q3+1.5(IQR) \\]
+
+Values outside these bounds are commonly flagged as potential outliers.
+
+---
+
+# 5. Isolation Forest — One of the most important algorithms
+
+(Important for ML interviews)
+
+## What is Isolation Forest?
+
+Isolation Forest is an unsupervised anomaly detection algorithm that identifies unusual observations by isolating them through random feature selection and random split values.
+
+Its central idea:
+
+> Anomalies are usually easier to isolate than normal observations.
+
+### ELI5 example
+
+Imagine 100 students standing in a large hall.
+
+Most students are standing together in groups.
+
+One student is standing alone in a corner.
+
+If you randomly divide the hall into smaller regions, that isolated student may be separated after only a few divisions.
+
+Normal students may require more divisions because they are surrounded by many other students.
+
+That's the intuition behind Isolation Forest.
+
+## How Isolation Forest works
+
+### Step 1: Select random data samples
+
+The algorithm takes samples from the dataset to construct isolation trees.
+
+### Step 2: Select a random feature
+
+For example:
+
+- Transaction amount
+- Transaction frequency
+- Account age
+
+### Step 3: Select a random split value
+
+Suppose transaction amounts range from ₹100 to ₹10,000.
+
+A random split might be ₹5,000.
+
+### Step 4: Split the data
+
+The observations are divided into two groups.
+
+The process continues recursively.
+
+### Step 5: Calculate path length
+
+Path length is the number of splits needed to isolate a data point.
+
+- Short path length → More likely to be anomalous.
+- Long path length → More likely to be normal.
+
+### Mathematical intuition
+
+The anomaly score is based on the average path length across isolation trees.
+
+A commonly used score formulation is:
+
+\\[ s(x,n)=2^{-\frac{E[h(x)]}{c(n)}} \\]
+
+Where:
+
+- \\(E[h(x)]\\) = Average path length for observation \\(x\\).
+- \\(c(n)\\) = Expected path length in a random binary search tree of sample size \\(n\\).
+
+Interpretation:
+
+- Score closer to 1 → More anomalous.
+- Score around 0.5 → Less clear / closer to ordinary observations.
+- Score below 0.5 → More likely normal under this scoring convention.
+
+The exact score interpretation depends on the implementation. Scikit-learn's `score_samples()` uses the opposite direction: lower values indicate more abnormal observations.
+
+---
+
+# 6. Local Outlier Factor (LOF)
+
+## What is LOF?
+
+Local Outlier Factor is an unsupervised anomaly detection algorithm that identifies observations with significantly lower local density than their neighbours.
+
+In simple words:
+
+**It checks whether a point is unusual compared with the points around it.**
+
+### ELI5 example
+
+Imagine two neighbourhoods:
+
+- Area A is a crowded city centre.
+- Area B is a quiet village.
+
+A person living in the village is not automatically unusual.
+
+But a person standing alone in the middle of a crowded city centre may be unusual compared with their immediate neighbours.
+
+LOF looks at local density rather than applying one global definition of normality.
+
+## How LOF works
+
+### Step 1: Find nearest neighbours
+
+For each point, find its \\(k\\) nearest neighbours.
+
+### Step 2: Calculate local reachability density
+
+Estimate how densely populated the point's neighbourhood is.
+
+### Step 3: Compare neighbouring densities
+
+Compare the point's local density with the local densities of its neighbours.
+
+### Step 4: Calculate LOF score
+
+Conceptually:
+
+\\[ LOF_k(p)= \frac{\text{Average local density of neighbours}} {\text{Local density of point }p} \\]
+
+Interpretation:
+
+| LOF score           | Meaning                       |
+| ------------------- | ----------------------------- |
+| Approximately 1     | Similar density to neighbours |
+| Greater than 1      | Potential local outlier       |
+| Much greater than 1 | Stronger anomaly indication   |
+
+This is a conceptual interpretation; the actual LOF formula uses local reachability densities.
+
+### When is LOF useful?
+
+- Detecting unusual customer behaviour.
+- Identifying unusual network activity.
+- Detecting unusual measurements in local clusters.
+- Datasets with regions of different densities.
+
+### Limitations
+
+- Sensitive to the choice of `n_neighbors`.
+- Distance calculations become expensive for large datasets.
+- Feature scaling is important.
+- It can struggle in very high-dimensional data.
+
+---
+
+# 7. One-Class SVM
+
+## What is One-Class SVM?
+
+One-Class Support Vector Machine is an unsupervised or semi-supervised anomaly detection technique that learns a boundary around normal data.
+
+Its goal is to identify observations that do not fit the learned region.
+
+### ELI5 example
+
+Imagine you train a security system using examples of normal network traffic.
+
+The system learns the region where most normal traffic exists.
+
+When new traffic falls outside that learned region, it may be flagged as an anomaly.
+
+### How it works
+
+1. Learn the structure of the normal data.
+2. Map data into a feature space, potentially using a kernel.
+3. Learn a boundary around the normal observations.
+4. Classify observations outside the learned region as outliers.
+
+### Important parameters
+
+| Parameter | Purpose                                                                                 |
+| --------- | --------------------------------------------------------------------------------------- |
+| `kernel`  | Determines the similarity function                                                      |
+| `nu`      | Controls an upper bound on training errors and a lower bound on support-vector fraction |
+| `gamma`   | Controls influence of individual training points for RBF and other applicable kernels   |
+
+### When is it useful?
+
+- Network intrusion detection.
+- Equipment monitoring.
+- Identifying deviations from normal operating patterns.
+
+### Limitations
+
+- Sensitive to parameter selection.
+- Feature scaling is important.
+- Training can become expensive on large datasets.
+- A poorly representative normal training dataset can produce poor boundaries.
+
+---
+
+# 8. Compare the three major algorithms
+
+| Feature           | Isolation Forest                        | LOF                                | One-Class SVM                            |
+| ----------------- | --------------------------------------- | ---------------------------------- | ---------------------------------------- |
+| Main idea         | Isolate observations                    | Compare local density              | Learn normal-data boundary               |
+| Uses neighbours?  | No direct nearest-neighbour requirement | Yes                                | No direct nearest-neighbour requirement  |
+| Best intuition    | Easy-to-isolate points are unusual      | Locally sparse points are unusual  | Points outside normal region are unusual |
+| Scaling           | Often helpful                           | Very important                     | Very important                           |
+| Main parameter    | `contamination`                         | `n_neighbors`                      | `nu`, `gamma`, `kernel`                  |
+| Typical challenge | Poor splits for certain structures      | High-dimensional distance problems | Parameter sensitivity and scaling        |
+
+**Practical rule:** Start with Isolation Forest as a baseline for many tabular anomaly-detection problems. Compare alternatives using domain knowledge and validation data.
+
+---
+
+# 9. Hands-on implementation — Fraud-like transaction data
+
+Let's build a small anomaly detection experiment using synthetic transaction data.
+
+We will deliberately generate normal transactions and a small set of unusual transactions. This lets us check whether the algorithm can identify the unusual examples.
+
+## Step 1 — Import libraries
+
+```
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+```
+
+## Step 2 — Generate synthetic data
+
+```
+np.random.seed(42)
+
+# Normal transactions
+normal_amount = np.random.normal(1000, 200, 500)
+normal_frequency = np.random.normal(5, 1, 500)
+
+# Unusual transactions
+anomaly_amount = np.random.normal(5000, 500, 20)
+anomaly_frequency = np.random.normal(20, 3, 20)
+
+# Combine data
+amount = np.concatenate([normal_amount, anomaly_amount])
+frequency = np.concatenate([normal_frequency, anomaly_frequency])
+
+X = np.column_stack([amount, frequency])
+
+# Ground-truth labels for this experiment only
+y_true = np.concatenate([
+    np.zeros(500),
+    np.ones(20)
+])
+
+print("Dataset shape:", X.shape)
+```
+
+Expected output:
+
+```
+Dataset shape: (520, 2)
+```
+
+We have:
+
+- 500 normal transactions.
+- 20 deliberately generated unusual transactions.
+
+## Step 3 — Scale the features
+
+```
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+```
+
+Why?
+
+Transaction amount and transaction frequency have different numerical scales.
+
+Scaling makes distance and geometry-based methods easier to apply fairly.
+
+For a real production evaluation, fit the scaler only on training data and transform validation/test data using that fitted scaler.
+
+## Step 4 — Train Isolation Forest
+
+```
+model = IsolationForest(
+    n_estimators=100,
+    contamination=20/520,
+    random_state=42
+)
+
+model.fit(X_scaled)
+
+predictions = model.predict(X_scaled)
+
+print(predictions[:10])
+```
+
+Scikit-learn prediction labels:
+
+- `1` = Normal
+- `-1` = Anomaly
+
+## Step 5 — Convert predictions into readable labels
+
+```
+df = pd.DataFrame(
+    X,
+    columns=["Transaction Amount", "Frequency"]
+)
+
+df["Prediction"] = predictions
+
+df["Status"] = df["Prediction"].map({
+    1: "Normal",
+    -1: "Anomaly"
+})
+
+print(df.head(10))
+```
+
+## Step 6 — Visualize anomalies
+
+```
+normal = df[df["Status"] == "Normal"]
+anomaly = df[df["Status"] == "Anomaly"]
+
+plt.figure(figsize=(9, 6))
+
+plt.scatter(
+    normal["Transaction Amount"],
+    normal["Frequency"],
+    label="Normal"
+)
+
+plt.scatter(
+    anomaly["Transaction Amount"],
+    anomaly["Frequency"],
+    label="Anomaly"
+)
+
+plt.xlabel("Transaction Amount")
+plt.ylabel("Transaction Frequency")
+
+plt.title("Isolation Forest Anomaly Detection")
+
+plt.legend()
+plt.show()
+```
+
+## Step 7 — Check performance using known labels
+
+Since this is synthetic data, we know which transactions we deliberately generated as anomalies.
+
+```
+from sklearn.metrics import classification_report, confusion_matrix
+
+y_pred = (predictions == -1).astype(int)
+
+print(confusion_matrix(y_true, y_pred))
+
+print(classification_report(
+    y_true,
+    y_pred,
+    target_names=["Normal", "Anomaly"]
+))
+```
+
+**Important:** We supplied `contamination=20/520` because we deliberately created 20 anomalies out of 520 observations. Real-world anomaly rates are usually unknown, so you should not assume the same ratio.
+
+Also, Isolation Forest does not learn the ground-truth labels in this experiment. We use them only afterward to evaluate its predictions.
+
+---
+
+# 10. Implement LOF and One-Class SVM
+
+Let's compare the other two algorithms using the same scaled dataset.
+
+### A. Local Outlier Factor
+
+```
+from sklearn.neighbors import LocalOutlierFactor
+
+lof = LocalOutlierFactor(
+    n_neighbors=20,
+    contamination=20/520
+)
+
+lof_predictions = lof.fit_predict(X_scaled)
+
+print(lof_predictions[:10])
+```
+
+Remember:
+
+- `1` = Normal
+- `-1` = Anomaly
+
+**Important:** LOF defaults to novelty detection being disabled. In this mode, `fit_predict()` detects anomalies in the training dataset. For new, unseen observations, use `novelty=True`, fit on normal training data, and then call `predict()` on new observations.
+
+### B. One-Class SVM
+
+```
+from sklearn.svm import OneClassSVM
+
+svm = OneClassSVM(
+    kernel="rbf",
+    gamma="scale",
+    nu=0.05
+)
+
+svm.fit(X_scaled)
+
+svm_predictions = svm.predict(X_scaled)
+
+print(svm_predictions[:10])
+```
+
+Here:
+
+- `1` = Normal
+- `-1` = Anomaly
+
+One-Class SVM's `nu` is a model parameter, not a guarantee of the exact anomaly percentage in future data.
+
+---
+
+# 11. How do we evaluate anomaly detection?
+
+This is particularly important in real AI/ML engineering.
+
+Suppose a bank processes 1 million transactions:
+
+- 999,000 are normal.
+- 1,000 are fraudulent.
+
+A model that predicts every transaction as normal gets 99.9% accuracy.
+
+But it detects zero fraud!
+
+Therefore, **accuracy alone is misleading for imbalanced anomaly detection.**
+
+### Important evaluation metrics
+
+| Metric    | Meaning                                                    |
+| --------- | ---------------------------------------------------------- |
+| Precision | Of the flagged anomalies, how many are actually anomalous? |
+| Recall    | Of all actual anomalies, how many did we detect?           |
+| F1-score  | Balance between precision and recall                       |
+| PR-AUC    | Precision-recall performance across thresholds             |
+| ROC-AUC   | Ranking ability across thresholds                          |
+
+### Example
+
+Suppose:
+
+- Actual fraud cases = 100
+- Detected fraud cases = 80
+- Correctly detected fraud cases = 70
+
+Then:
+
+\\[ Precision=\frac{70}{80}=87.5\\% \\]\\[ Recall=\frac{70}{100}=70\\% \\]\\[ F1=\frac{2PR}{P+R} \\]\\[ F1\approx77.8\\% \\]
+
+**What if labels are unavailable?**
+
+You can use:
+
+1. Domain expert review of flagged observations.
+2. Stability of anomalies across different model settings.
+3. Synthetic anomaly injection for controlled testing.
+4. Historical incident data when it becomes available.
+5. Investigation of anomaly score distributions.
+6. Operational measures such as false-alert volume.
+
+An unsupervised model's anomaly score is not automatically a calibrated probability of fraud.
+
+---
+
+# 12. Real-world industry applications
+
+**1. Banking and FinTech**
+
+Identify unusual transactions, account takeovers, suspicious spending and payment patterns.
+
+---
+
+**2. Cybersecurity**
+
+Detect unusual network traffic, suspicious login behaviour and possible intrusion activity.
+
+---
+
+**3. Manufacturing**
+
+Identify abnormal machine vibration, temperature and pressure readings before equipment failure.
+
+---
+
+**4. Cloud and IT infrastructure**
+
+Identify unusual CPU usage, memory consumption, traffic spikes and system behaviour.
+
+---
+
+# 13. Production-level AI/ML engineering perspective
+
+Knowing an algorithm is not enough. An AI/ML Engineer must understand how to integrate it into a working system.
+
+Consider a FinTech fraud detection pipeline:
+
+**Transaction data**
+
+Amount, location, frequency, device, time
+
+**Data preprocessing**
+
+Missing values, feature engineering, scaling
+
+**Anomaly detection model**
+
+Isolation Forest / LOF / One-Class SVM
+
+**Anomaly score and threshold**
+
+Determine whether investigation is needed
+
+(Normal)
+
+Continue transaction processing
+
+(Suspicious)
+
+Additional verification or review
+
+Production systems also require monitoring, feedback, security and periodic retraining.
+
+### What should an engineer monitor?
+
+- False-positive rate.
+- Missed anomaly rate.
+- Model inference latency.
+- Changes in normal data distribution.
+- Anomaly score distribution.
+- Number of alerts generated per day.
+- Feedback from human investigators.
+
+A model that detects every unusual event but generates 50,000 false alerts per day may not be useful in production.
+
+---
+
+# 14. Advanced concepts to explore
+
+Once you understand the foundational algorithms, explore these:
+
+| Technique                | Main idea                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| Autoencoders             | Learn to reconstruct normal data; large reconstruction error may indicate anomalies |
+| LSTM-based detection     | Detect unusual patterns in sequential data                                          |
+| Robust covariance        | Estimate a robust distribution for approximately Gaussian data                      |
+| Deep SVDD                | Learn a compact representation of normal data                                       |
+| Variational Autoencoders | Model complex data distributions and identify unusual observations                  |
+
+For your AI/ML Engineer journey, **Autoencoders** will be particularly important when we move deeper into deep learning.
+
+---
+
+# 15. Interview preparation 🎯
+
+**60-second interview answer**
+
+"Anomaly detection is a machine learning technique used to identify unusual observations that differ from normal data patterns. It is widely used in fraud detection, cybersecurity, industrial monitoring and healthcare. Common algorithms include Isolation Forest, Local Outlier Factor and One-Class SVM. Isolation Forest identifies anomalies based on how quickly observations can be isolated, LOF compares local data density with neighbouring points, and One-Class SVM learns a boundary around normal data. For evaluation, we use precision, recall, F1-score and PR-AUC when labels are available, because accuracy can be misleading for highly imbalanced datasets."
+
+### Top interview questions
+
+**Q1. Why is Isolation Forest effective for anomaly detection?**
+
+Because anomalies are generally easier to isolate using random feature splits and therefore tend to have shorter average path lengths.
+
+**Q2. What is the difference between LOF and Isolation Forest?**
+
+LOF identifies points with unusually low local density compared with neighbours. Isolation Forest identifies observations that can be isolated using relatively few random splits.
+
+**Q3. Why is accuracy not suitable for fraud detection?**
+
+Fraud datasets are highly imbalanced. A model can achieve high accuracy by predicting every transaction as normal while detecting no fraud.
+
+**Q4. What is contamination?**
+
+It is an estimate of the proportion of anomalies in the dataset, used by some algorithms to determine how many observations to flag.
+
+**Q5. Can anomaly detection work without labelled data?**
+
+Yes. Unsupervised algorithms learn patterns or structures in data and identify observations that deviate from them.
+
+---
+
+# 16. Today's practical assignment
+
+(Pending — independent implementation)
+
+## Mini-project: Transaction Anomaly Detection
+
+Build a Python program that compares three algorithms.
+
+**Your tasks:**
+
+- Generate 1,000 normal transactions and 30 unusual transactions.
+- Create features: transaction amount, transaction frequency and transaction time.
+- Apply feature scaling.
+- Train Isolation Forest.
+- Train LOF.
+- Train One-Class SVM.
+- Compare the anomalies identified by each model.
+- Visualize the results.
+- Calculate precision, recall and F1-score using your synthetic ground-truth labels.
+- Write five observations about the algorithms.
+
+**Bonus challenge:** Add an `anomaly_score` column and rank transactions from most unusual to least unusual. Explain why the scores from different algorithms should not be compared directly without calibration.
+
+---
+
+# 17. Quick knowledge check
+
+**Day 26 quiz** (/5 answered)
+
+---
+
+# 📚 AI/ML Engineer Progress Tracker
+
+**26 / 120 days**
+
+# 21.7%
+
+| Day    | Topic                   | Status           |
+| ------ | ----------------------- | ---------------- |
+| 21     | K-Means                 | (Covered)        |
+| 22     | DBSCAN                  | (Covered)        |
+| 23     | Hierarchical Clustering | (Covered)        |
+| 24     | Gaussian Mixture Models | (Covered)        |
+| 25     | t-SNE & UMAP            | (Covered)        |
+| **26** | **Anomaly Detection**   | (Today's lesson) |
+
+*Lesson coverage does not mean the independent coding assignment has been completed.*
+
+## Tomorrow — Day 27
+
+**Ensemble Learning — Advanced Concepts**
+
+- What is ensemble learning?
+- Bagging vs Boosting vs Stacking
+- AdaBoost
+- Gradient Boosting
+- XGBoost
+- LightGBM
+- CatBoost
+- Practical comparison of ensemble models
+
+**Today's core takeaway:**
+
+> Anomaly detection teaches machines to recognize what is unusual, even when they have not been explicitly taught every possible abnormal pattern.
+
+Keep going. The goal is not just to know ML algorithms — it's to become an engineer who can select, implement, evaluate and deploy them. 💪
